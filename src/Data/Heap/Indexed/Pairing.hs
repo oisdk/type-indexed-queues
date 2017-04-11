@@ -42,7 +42,6 @@ insert :: Ord a => a -> Pairing n a -> Pairing (1 + n) a
 insert = merge . singleton
 {-# INLINABLE insert #-}
 
-
 mergePairs :: Ord a => HVec n a -> Pairing n a
 mergePairs HNil = E
 mergePairs (HCons h HNil) = h
