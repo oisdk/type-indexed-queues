@@ -59,7 +59,6 @@ testSize n =
                    , bench "trav binom"   $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
                    , bench "trav skew"    $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
                    ]
-
         ]
 
 main :: IO ()

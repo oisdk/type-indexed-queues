@@ -38,7 +38,9 @@ instance Ord a =>
     mappend (x :- xs) (y :- ys) = Skip (mergeCarry (mergeTree x y) xs ys)
     mempty = Nil
 
-mergeCarry :: Ord a => Tree rk a -> Binomial rk a -> Binomial rk a -> Binomial rk a
+mergeCarry
+    :: Ord a
+    => Tree rk a -> Binomial rk a -> Binomial rk a -> Binomial rk a
 mergeCarry !t Nil ys              = carryLonger t ys
 mergeCarry !t xs Nil              = carryLonger t xs
 mergeCarry !t (Skip xs) (Skip ys) = t :- mappend xs ys
