@@ -2,7 +2,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators         #-}
 
-module Data.Heap.Class.Indexed where
+module Data.Heap.Indexed.Class where
 
 import           GHC.TypeLits
 

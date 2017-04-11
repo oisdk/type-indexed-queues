@@ -1,12 +1,11 @@
 {-# LANGUAGE DataKinds           #-}
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE RoleAnnotations     #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators       #-}
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
-module Data.Heap.Pairing.Indexed
+module Data.Heap.Indexed.Pairing
   (Heap
   ,empty
   ,singleton

@@ -6,9 +6,9 @@
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
-module Data.Heap.Skew.Indexed where
+module Data.Heap.Indexed.Skew where
 
-import           Data.Heap.Class.Indexed
+import           Data.Heap.Indexed.Class
 
 import           GHC.TypeLits
 

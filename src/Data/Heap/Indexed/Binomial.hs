@@ -8,7 +8,7 @@
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
-module Data.Heap.Binomial.Indexed where
+module Data.Heap.Indexed.Binomial where
 
 import GHC.TypeLits
 

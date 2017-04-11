@@ -9,7 +9,7 @@
 
 module Data.Traversable.Sort where
 
-import           Data.Heap.Class.Indexed
+import           Data.Heap.Indexed.Class
 import           GHC.TypeLits
 
 data Sort f a r where
