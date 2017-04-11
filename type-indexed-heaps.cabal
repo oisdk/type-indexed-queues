@@ -23,6 +23,7 @@ library
                      , Data.Heap.Indexed.Pairing
                      , Data.Heap.Indexed.Binomial
                      , Data.Heap.Indexed.Skew
+                     , Data.Heap.Indexed.Leftist
                      , Data.Heap.Indexed.Class
                      , Data.Traversable.Sort
                      , TypeLevel.Nat
