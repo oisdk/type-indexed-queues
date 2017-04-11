@@ -22,7 +22,7 @@ instance Functor (Sort f x) where
     Sort (\h' -> case g h' of (remn, r) -> (remn, f r)) h
   {-# INLINE fmap #-}
 
-instance IndexedHeap f x => Applicative (Sort f x) where
+instance (IndexedHeap f, Ord x) => Applicative (Sort f x) where
   pure x = Sort (\h -> (h, x)) empty
   {-# INLINE pure #-}
 
@@ -35,21 +35,21 @@ instance IndexedHeap f x => Applicative (Sort f x) where
                   (v'', a b)}}
   {-# INLINABLE (<*>) #-}
 
-liftSort :: IndexedHeap f x => x -> Sort f x x
+liftSort :: (IndexedHeap f, Ord x) => x -> Sort f x x
 liftSort a = Sort (\h -> case minView h of (x, h') -> (h', x)) (singleton a)
 {-# INLINABLE liftSort #-}
 
 runSort :: forall x a f. Sort f x a -> a
 runSort (Sort (f :: f (m + 0) x -> (f 0 x, a)) xs) = snd $ f xs
 
-sortTraversable :: (IndexedHeap f a, Traversable t) => p f -> t a -> t a
+sortTraversable :: (IndexedHeap f, Traversable t, Ord a) => p f -> t a -> t a
 sortTraversable (_ :: p f) =
     runSort .
     traverse
-        (liftSort :: IndexedHeap f x =>
+        (liftSort :: (IndexedHeap f, Ord x) =>
                      x -> Sort f x x)
 {-# INLINABLE sortTraversable #-}
 
-sortTraversal :: IndexedHeap f a => ((a -> Sort f a a) -> t -> Sort f a t) -> t -> t
+sortTraversal :: (IndexedHeap f, Ord a) => ((a -> Sort f a a) -> t -> Sort f a t) -> t -> t
 sortTraversal trav = runSort . trav liftSort
 {-# INLINABLE sortTraversal #-}

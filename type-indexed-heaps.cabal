@@ -24,9 +24,8 @@ library
                      , Data.Heap.Indexed.Skew
                      , Data.Heap.Indexed.Class
                      , Data.Traversable.Sort
-                     , Data.Traversable.Sort.Nat
-  other-modules:       TypeLevel.Singletons
                      , TypeLevel.Nat
+  other-modules:       TypeLevel.Singletons
                      , TypeLevel.Nat.Proofs
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise >= 0.5

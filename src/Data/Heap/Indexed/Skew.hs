@@ -1,7 +1,5 @@
 {-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE GADTs                 #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators         #-}
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
@@ -12,12 +10,11 @@ import           Data.Heap.Indexed.Class
 
 import           GHC.TypeLits
 
-data Heap n a where
-        Empty :: Heap 0 a
-        Node :: a -> Heap n a -> Heap m a -> Heap (1 + n + m) a
+data Skew n a where
+        Empty :: Skew 0 a
+        Node :: a -> Skew n a -> Skew m a -> Skew (1 + n + m) a
 
-instance Ord a =>
-         IndexedHeap Heap a where
+instance IndexedHeap Skew where
     empty = Empty
     merge Empty ys = ys
     merge xs Empty = xs

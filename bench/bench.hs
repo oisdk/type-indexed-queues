@@ -1,32 +1,73 @@
+{-# LANGUAGE DataKinds #-}
+
 import           Criterion.Main
 import           System.Random
 
 import           Data.Traversable.Sort
-import           Data.Heap.Skew.Indexed
+import           Data.Heap.Class
 
-import           Control.Monad     (replicateM)
+import qualified Data.Heap.Indexed.Binomial as Indexed
+import qualified Data.Heap.Indexed.Pairing  as Indexed
+import qualified Data.Heap.Indexed.Skew     as Indexed
 
-import Data.List (sort)
+import           Data.Heap.Binomial
+import           Data.Heap.Pairing
+import           Data.Heap.Skew
 
--- import qualified Data.PQueue.Min as P
+import           Control.Monad              (replicateM)
 
-import Data.Proxy
+import           Data.List                  (sort)
+import qualified Data.Sequence              as Seq
+import qualified Data.PQueue.Min            as P
+
+import           Data.Proxy
+
+import           TypeLevel.Nat
 
 randInt :: IO Int
 randInt = randomIO
 
 testSize :: Int -> Benchmark
 testSize n =
-    env (replicateM n randInt) $
-    \xs ->
-         bgroup
-             (show n)
-             [ bench "mn" $ nf (sortTraversable (Proxy :: Proxy Heap)) xs
-             , bench "nmn" $ nf sort xs]
+    bgroup
+        (show n)
+        [ env (Seq.replicateM n randInt) $
+          \xs ->
+               bgroup
+                   "seq"
+                   [ bench "trav binom" $
+                     nf
+                         (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0)))
+                         xs
+                   , bench "trav pairing" $
+                     nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav sew" $
+                     nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "Seq.sort" $ nf Seq.sort xs
+                   , bench "Seq.unstableSort" $ nf Seq.unstableSort xs]
+        , env (replicateM n randInt) $
+          \xs ->
+               bgroup
+                   "list"
+                   [ bench "trav binom" $
+                     nf
+                         (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0)))
+                         xs
+                   , bench "trav pairing" $
+                     nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav sew" $
+                     nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "Data.List" $ nf sort xs
+                   , bench "sort binom" $
+                     nf (heapSort (Proxy :: Proxy (Binomial 'Z))) xs
+                   , bench "sort pairing" $
+                     nf (heapSort (Proxy :: Proxy Pairing)) xs
+                   , bench "sort skew" $ nf (heapSort (Proxy :: Proxy Skew)) xs
+                   , bench "sort pqueue" $ nf (P.toList . P.fromList) xs]]
 
 main :: IO ()
 main =
     defaultMain $
     map
         testSize
-        [500, 1000, 10000]
+        [500, 1000, 10000, 100000, 500000]

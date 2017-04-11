@@ -1,8 +1,5 @@
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Data.Heap.Pairing
-  (Heap
+  (Pairing
   ,singleton
   ,insert
   ,minView)
@@ -10,11 +7,9 @@ module Data.Heap.Pairing
 
 import           Data.Heap.Class
 
-data Heap a = E | T a (HVec a)
+data Pairing a = E | T a [Pairing a]
 
-type HVec a = [Heap a]
-
-instance Ord a => Monoid (Heap a) where
+instance Ord a => Monoid (Pairing a) where
     mempty = E
     mappend E ys = ys
     mappend xs E = xs
@@ -23,15 +18,19 @@ instance Ord a => Monoid (Heap a) where
       | otherwise = T y (h1 : ys)
     {-# INLINABLE mappend #-}
 
-instance Ord a => MinHeap Heap a where
+instance MinHeap Pairing where
     singleton a = T a []
     insert = mappend . singleton
     {-# INLINABLE insert #-}
     minView (T x hs) = Just (x, mergePairs hs)
     minView E        = Nothing
     {-# INLINABLE minView #-}
+    merge = mappend
+    {-# INLINE merge #-}
+    empty = mempty
+    {-# INLINE empty #-}
 
-mergePairs :: Ord a => HVec a -> Heap a
+mergePairs :: Ord a => [Pairing a] -> Pairing a
 mergePairs [] = E
 mergePairs [h] = h
 mergePairs (h1 : h2 : hs) =

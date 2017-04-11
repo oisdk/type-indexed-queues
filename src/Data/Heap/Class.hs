@@ -1,21 +1,42 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Data.Heap.Class where
 
 import Data.List (unfoldr)
 
-class Monoid (h a) => MinHeap h a where
-    {-# MINIMAL minView, singleton #-}
-    minView :: h a -> Maybe (a, h a)
-    singleton :: a -> h a
-    insert :: a -> h a -> h a
-    insert = mappend . singleton
+class MinHeap h  where
+    {-# MINIMAL minView , singleton , merge , empty #-}
+    minView
+        :: Ord a
+        => h a -> Maybe (a, h a)
+    singleton
+        :: Ord a
+        => a -> h a
+    insert
+        :: Ord a
+        => a -> h a -> h a
+    insert = merge . singleton
+    merge
+        :: Ord a
+        => h a -> h a -> h a
+    empty
+        :: Ord a
+        => h a
 
-toList :: MinHeap h a => h a -> [a]
+newtype HeapMonoid h a = HeapMonoid { runHeapMonoid :: h a }
+
+instance (MinHeap h, Ord a) => Monoid (HeapMonoid h a) where
+    mappend (HeapMonoid xs) (HeapMonoid ys) = HeapMonoid (merge xs ys)
+    mempty = HeapMonoid empty
+
+toList :: (Ord a, MinHeap h) => h a -> [a]
 toList = unfoldr minView
 
-fromList :: MinHeap h a => [a] -> h a
-fromList = foldr insert mempty
+fromList :: (Ord a, MinHeap h) => [a] -> h a
+fromList = foldr insert empty
 
-fromFoldable :: (MinHeap h a, Foldable f) => f a -> h a
-fromFoldable = foldMap singleton
+fromFoldable :: (MinHeap h, Foldable f, Ord a) => f a -> h a
+fromFoldable = runHeapMonoid . foldMap (HeapMonoid . singleton)
+
+heapSort :: (MinHeap h, Ord a) => p h -> [a] -> [a]
+heapSort (_ :: p h) = toList . (fromList :: Ord a => [a] -> h a)

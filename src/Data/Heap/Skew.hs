@@ -1,13 +1,10 @@
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-
 module Data.Heap.Skew where
 
 import           Data.Heap.Class
 
-data Heap a = Empty | Node a (Heap a) (Heap a)
+data Skew a = Empty | Node a (Skew a) (Skew a)
 
-instance Ord a => Monoid (Heap a) where
+instance Ord a => Monoid (Skew a) where
     mempty = Empty
     mappend Empty ys = ys
     mappend xs Empty = xs
@@ -15,7 +12,9 @@ instance Ord a => Monoid (Heap a) where
       | x <= y    = Node x (mappend h2 rx) lx
       | otherwise = Node y (mappend h1 ry) ly
 
-instance Ord a => MinHeap Heap a where
+instance MinHeap Skew where
     singleton x = Node x Empty Empty
     minView Empty        = Nothing
     minView (Node x l r) = Just (x, mappend l r)
+    empty = mempty
+    merge = mappend
