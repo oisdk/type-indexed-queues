@@ -35,35 +35,26 @@ testSize n =
           \xs ->
                bgroup
                    "seq"
-                   [ bench "trav binom" $
-                     nf
-                         (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0)))
-                         xs
-                   , bench "trav pairing" $
-                     nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
-                   , bench "trav sew" $
-                     nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
-                   , bench "Seq.sort" $ nf Seq.sort xs
-                   , bench "Seq.unstableSort" $ nf Seq.unstableSort xs]
+                   [ bench "trav binom"       $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   , bench "trav pairing"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav skew"        $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "Seq.sort"         $ nf Seq.sort xs
+                   , bench "Seq.unstableSort" $ nf Seq.unstableSort xs
+                   ]
         , env (replicateM n randInt) $
           \xs ->
                bgroup
                    "list"
-                   [ bench "trav binom" $
-                     nf
-                         (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0)))
-                         xs
-                   , bench "trav pairing" $
-                     nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
-                   , bench "trav sew" $
-                     nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
-                   , bench "Data.List" $ nf sort xs
-                   , bench "sort binom" $
-                     nf (heapSort (Proxy :: Proxy (Binomial 'Z))) xs
-                   , bench "sort pairing" $
-                     nf (heapSort (Proxy :: Proxy Pairing)) xs
-                   , bench "sort skew" $ nf (heapSort (Proxy :: Proxy Skew)) xs
-                   , bench "sort pqueue" $ nf (P.toList . P.fromList) xs]]
+                   [ bench "trav binom"   $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   , bench "trav pairing" $ nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav skew"    $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "Data.List"    $ nf sort xs
+                   , bench "sort binom"   $ nf (heapSort (Proxy :: Proxy (Binomial 'Z))) xs
+                   , bench "sort pairing" $ nf (heapSort (Proxy :: Proxy Pairing)) xs
+                   , bench "sort skew"    $ nf (heapSort (Proxy :: Proxy Skew)) xs
+                   , bench "sort pqueue"  $ nf (P.toList . P.fromList) xs
+                   ]
+        ]
 
 main :: IO ()
 main =
