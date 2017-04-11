@@ -1,11 +1,13 @@
-{-# LANGUAGE DataKinds          #-}
-{-# LANGUAGE BangPatterns       #-}
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE RankNTypes         #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE DataKinds    #-}
+{-# LANGUAGE GADTs        #-}
+{-# LANGUAGE RankNTypes   #-}
 
 module Data.BinomialHeap where
 
 import           Data.List     (unfoldr)
+
+import           TypeLevel.Nat
 
 infixr 5 :-
 data Heap rk a
@@ -15,8 +17,6 @@ data Heap rk a
            (Heap ('S rk) a)
 
 data Tree rk a = Root a (Node rk a)
-
-data Nat = Z | S Nat
 
 data Node n a where
         NilN :: Node 'Z a
@@ -28,23 +28,23 @@ mergeTree xr@(Root x xs) yr@(Root y ys)
   | otherwise = Root y (xr :< ys)
 
 merge :: Ord a => Heap rk a -> Heap rk a -> Heap rk a
-merge Nil ys = ys
-merge xs Nil = xs
+merge Nil ys              = ys
+merge xs Nil              = xs
 merge (Skip xs) (Skip ys) = Skip (merge xs ys)
 merge (Skip xs) (y :- ys) = y :- merge xs ys
 merge (x :- xs) (Skip ys) = x :- merge xs ys
 merge (x :- xs) (y :- ys) = Skip (mergeCarry (mergeTree x y) xs ys)
 
 mergeCarry :: Ord a => Tree rk a -> Heap rk a -> Heap rk a -> Heap rk a
-mergeCarry !t Nil ys = carryLonger t ys
-mergeCarry !t xs Nil = carryLonger t xs
+mergeCarry !t Nil ys              = carryLonger t ys
+mergeCarry !t xs Nil              = carryLonger t xs
 mergeCarry !t (Skip xs) (Skip ys) = t :- merge xs ys
 mergeCarry !t (Skip xs) (y :- ys) = Skip (mergeCarry (mergeTree t y) xs ys)
 mergeCarry !t (x :- xs) (Skip ys) = Skip (mergeCarry (mergeTree t x) xs ys)
 mergeCarry !t (x :- xs) (y :- ys) = t :- mergeCarry (mergeTree x y) xs ys
 
 carryLonger :: Ord a => Tree rk a -> Heap rk a -> Heap rk a
-carryLonger !t Nil = t :- Nil
+carryLonger !t Nil       = t :- Nil
 carryLonger !t (Skip xs) = t :- xs
 carryLonger !t (x :- xs) = Skip (carryLonger (mergeTree t x) xs)
 
@@ -70,7 +70,7 @@ pushLeft t (Zipper (x :< xs) ts)
 minViewZip :: Ord a => Heap rk a -> MinViewZipper a rk
 minViewZip Nil = Infty
 minViewZip (Skip xs) = case minViewZip xs of
-  Infty -> Infty
+  Infty   -> Infty
   Min e x -> Min e (slideLeft x)
 minViewZip (t@(Root x ts) :- f) =
     case minViewZip f of
@@ -81,7 +81,7 @@ minViewZip (t@(Root x ts) :- f) =
 minView :: Ord a => Heap rk a -> Maybe (a, Heap rk a)
 minView hs =
     case minViewZip hs of
-        Infty -> Nothing
+        Infty               -> Nothing
         Min x (Zipper _ ts) -> Just (x, ts)
 
 newtype BinHeap a = BinHeap { runBinHeap :: Heap 'Z a }
