@@ -1,8 +1,9 @@
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Data.Heap.Skew where
 
-import Data.Heap.Class
+import           Data.Heap.Class
 
 data Heap a = Empty | Node a (Heap a) (Heap a)
 
@@ -16,5 +17,5 @@ instance Ord a => Monoid (Heap a) where
 
 instance Ord a => MinHeap Heap a where
     singleton x = Node x Empty Empty
-    minView Empty = Nothing
+    minView Empty        = Nothing
     minView (Node x l r) = Just (x, mappend l r)
