@@ -15,8 +15,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Data.BinomialHeap
-                     , Data.BinomialHeap.Indexed
+  exposed-modules:     Data.Heap.Binomial
+                     , Data.Heap.Binomial.Indexed
                      , Data.Traversable.Sort
                      , Data.Traversable.Sort.Nat
   other-modules:       TypeLevel.Singletons

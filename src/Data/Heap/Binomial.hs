@@ -3,7 +3,7 @@
 {-# LANGUAGE GADTs        #-}
 {-# LANGUAGE RankNTypes   #-}
 
-module Data.BinomialHeap where
+module Data.Heap.Binomial where
 
 import           Data.List     (unfoldr)
 
