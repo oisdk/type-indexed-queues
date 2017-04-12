@@ -28,9 +28,9 @@ library
                      , Data.Heap.Indexed.Class
                      , Data.Traversable.Sort
                      , TypeLevel.Nat
+                     , Data.BinaryTree
   other-modules:       TypeLevel.Singletons
                      , TypeLevel.Nat.Proofs
-                     , Data.BinaryTree
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise >= 0.5
                      , deepseq >= 1.4

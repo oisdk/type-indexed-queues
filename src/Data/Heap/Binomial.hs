@@ -1,8 +1,10 @@
-{-# LANGUAGE BangPatterns      #-}
-{-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GADTs             #-}
-{-# LANGUAGE RankNTypes        #-}
+{-# LANGUAGE BangPatterns       #-}
+{-# LANGUAGE DataKinds          #-}
+{-# LANGUAGE FlexibleInstances  #-}
+{-# LANGUAGE GADTs              #-}
+{-# LANGUAGE RankNTypes         #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveFoldable     #-}
 
 module Data.Heap.Binomial where
 
@@ -18,6 +20,9 @@ data Binomial rk a
            (Binomial ('S rk) a)
 
 data Tree rk a = Root a (Node rk a)
+
+deriving instance Foldable (Tree rk)
+deriving instance Foldable (Node rk)
 
 data Node n a where
         NilN :: Node 'Z a
