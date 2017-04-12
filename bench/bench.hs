@@ -29,6 +29,8 @@ import           Data.Proxy
 
 import           TypeLevel.Nat
 
+import           Data.BinaryTree
+
 randInt :: IO Int
 randInt = randomIO
 
@@ -46,6 +48,15 @@ testSize n =
                    , bench "trav leftist"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Leftist)) xs
                    , bench "Seq.sort"         $ nf Seq.sort xs
                    , bench "Seq.unstableSort" $ nf Seq.unstableSort xs
+                   ]
+        , env (replicateA n randInt) $
+          \xs ->
+               bgroup
+                   "tree"
+                   [ bench "trav binom"       $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   , bench "trav pairing"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav skew"        $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "trav leftist"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Leftist)) xs
                    ]
         , env (replicateM n randInt) $
           \xs ->
