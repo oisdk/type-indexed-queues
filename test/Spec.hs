@@ -11,19 +11,21 @@ import           Test.Tasty
 import           Test.Tasty.QuickCheck
 
 import           Data.BinaryTree
+import qualified Data.RoseTree              as Rose
+
 import           Data.Heap.Binomial         hiding (Tree)
 import qualified Data.Heap.Binomial         as Binomial
 import           Data.Heap.Braun            (Braun (..))
-import           Data.Heap.Pairing          (Pairing)
 import           Data.Heap.Leftist          (Leftist)
+import           Data.Heap.Pairing          (Pairing)
 import           Data.Heap.Skew
 
 import qualified Data.Heap.Indexed.Binomial as Indexed
 import qualified Data.Heap.Indexed.Braun    as Indexed
+import           Data.Heap.Indexed.Erased
 import qualified Data.Heap.Indexed.Leftist  as Indexed
 import qualified Data.Heap.Indexed.Pairing  as Indexed
 import qualified Data.Heap.Indexed.Skew     as Indexed
-import           Data.Heap.Indexed.Erased
 
 import           Data.Heap.Class
 import           Data.Heap.Indexed.Class
@@ -33,6 +35,8 @@ import           TypeLevel.Nat
 import           Data.List                  (sort)
 
 import           Data.Proxy
+
+import           Data.Functor.Classes       (liftShowsPrec)
 
 properBinomial :: Ord a => Binomial 'Z a -> Bool
 properBinomial = go 1 where
@@ -71,6 +75,12 @@ indexedSort (_ :: Proxy h) =
         (\xs ->
               heapSort (Proxy :: Proxy (ErasedSize h)) (xs :: [Int]) ===
               sort xs)
+
+intTree :: Gen (Tree Int)
+intTree = sized (`replicateA` arbitrary)
+
+intRoseTree :: Gen (Rose.Tree Int)
+intRoseTree = sized (`Rose.replicateA` arbitrary)
 
 main :: IO ()
 main = do
@@ -111,8 +121,21 @@ main = do
                   "Indexed Skew"
                   [ indexedSort (Proxy :: Proxy Indexed.Skew) ]
             , testGroup
-                  "Tree"
+                  "Binary Tree"
                   [ testProperty "readshow" $
-                    forAll (sized $ flip replicateA arbitrary) $
+                    forAll intTree $
                     \xs ->
-                         (read . show) xs === (xs :: Tree Int)]]
+                         (read . show) xs === xs
+                  , testProperty "show" $
+                    forAll intTree $
+                    \xs -> liftShowsPrec showsPrec showList 0 xs "" === show xs]
+            , testGroup
+                  "Rose Tree"
+                  [ testProperty "readshow" $
+                    forAll intRoseTree $
+                    \xs ->
+                         (read . show) xs === xs
+                  , testProperty "show" $
+                    forAll intRoseTree $
+                    \xs -> liftShowsPrec showsPrec showList 0 xs "" === show xs]
+            ]

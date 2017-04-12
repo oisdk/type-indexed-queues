@@ -21,6 +21,7 @@ library
                      , Data.Heap.Leftist
                      , Data.Heap.Braun
                      , Data.Heap.Class
+                     , Data.Heap.WithOrdDict
                      , Data.Heap.Indexed.Pairing
                      , Data.Heap.Indexed.Binomial
                      , Data.Heap.Indexed.Skew
@@ -31,6 +32,7 @@ library
                      , Data.Traversable.Sort
                      , TypeLevel.Nat
                      , Data.BinaryTree
+                     , Data.RoseTree
   other-modules:       TypeLevel.Singletons
                      , TypeLevel.Nat.Proofs
   build-depends:       base >= 4.7 && < 5

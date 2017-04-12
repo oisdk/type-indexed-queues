@@ -1,8 +1,5 @@
 module Data.Heap.Pairing
-  (Pairing
-  ,singleton
-  ,insert
-  ,minView)
+  (Pairing(..))
   where
 
 import           Data.Heap.Class
