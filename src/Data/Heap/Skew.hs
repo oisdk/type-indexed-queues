@@ -1,7 +1,9 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
-module Data.Heap.Skew where
+module Data.Heap.Skew
+  (Skew(..))
+  where
 
 import           Data.BinaryTree
 import           Data.Heap.Class

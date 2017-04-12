@@ -1,7 +1,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 
-module Data.Heap.Class where
+module Data.Heap.Class
+  (PriorityQueue(..)
+  ,MeldableQueue(..))
+  where
 
 import           Data.List (unfoldr)
 
@@ -41,6 +44,7 @@ newtype QueueWrapper h a = QueueWrapper
     { runQueueWrapper :: h a
     }
 
-instance MeldableQueue h a => Monoid (QueueWrapper h a) where
+instance MeldableQueue h a =>
+         Monoid (QueueWrapper h a) where
     mempty = QueueWrapper empty
     mappend (QueueWrapper xs) (QueueWrapper ys) = QueueWrapper (merge xs ys)

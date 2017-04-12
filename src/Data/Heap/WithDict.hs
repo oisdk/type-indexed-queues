@@ -4,7 +4,9 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeFamilies          #-}
 
-module Data.Heap.WithDict where
+module Data.Heap.WithDict
+  (WithDict(..))
+  where
 
 import           Data.Heap.Class
 import           Data.Proxy

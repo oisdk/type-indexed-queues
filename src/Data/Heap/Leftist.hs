@@ -1,7 +1,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances     #-}
 
-module Data.Heap.Leftist where
+module Data.Heap.Leftist
+  (Leftist(..))
+  where
 
 import Data.Heap.Class
 

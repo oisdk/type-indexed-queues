@@ -1,7 +1,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances     #-}
 
-module Data.Heap.Braun where
+module Data.Heap.Braun
+  (Braun(..))
+  where
 
 import Data.BinaryTree
 import Data.Heap.Class

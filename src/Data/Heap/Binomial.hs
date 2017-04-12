@@ -7,7 +7,11 @@
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE StandaloneDeriving    #-}
 
-module Data.Heap.Binomial where
+module Data.Heap.Binomial
+  (Binomial(..)
+  ,Node(..)
+  ,Tree(..))
+  where
 
 import           TypeLevel.Nat
 
