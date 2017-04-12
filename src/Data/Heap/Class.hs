@@ -1,45 +1,43 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeFamilies        #-}
 
 module Data.Heap.Class where
 
 import Data.List (unfoldr)
+import GHC.Exts (Constraint)
 
 class PriorityQueue h  where
+
+    type Suitable h a :: Constraint
+    type Suitable h a = Ord a
 
     {-# MINIMAL minView , insert , empty #-}
 
     minView
-        :: Ord a
+        :: Suitable h a
         => h a -> Maybe (a, h a)
 
     insert
-        :: Ord a
+        :: Suitable h a
         => a -> h a -> h a
     empty
-        :: Ord a
+        :: Suitable h a
         => h a
     singleton
-        :: Ord a
+        :: Suitable h a
         => a -> h a
     singleton = flip insert empty
 
-    toList :: Ord a => h a -> [a]
+    toList :: Suitable h a => h a -> [a]
     toList = unfoldr minView
 
-    fromList :: Ord a => [a] -> h a
+    fromList :: Suitable h a => [a] -> h a
     fromList = foldr insert empty
 
-    heapSort :: Ord a => p h -> [a] -> [a]
-    heapSort (_ :: p h) = toList . (fromList :: Ord a => [a] -> h a)
+    heapSort :: Suitable h a => p h -> [a] -> [a]
+    heapSort (_ :: p h) = toList . (fromList :: Suitable h a => [a] -> h a)
 
 class PriorityQueue h => MeldableQueue h where
-    merge :: Ord a => h a -> h a -> h a
+    merge :: Suitable h a => h a -> h a -> h a
 
-    fromFoldable :: (Foldable f, Ord a) => f a -> h a
-    fromFoldable = runQueueWrapper . foldMap (QueueWrapper . singleton)
-
-newtype QueueWrapper h a = QueueWrapper { runQueueWrapper :: h a }
-
-instance (MeldableQueue h, Ord a) => Monoid (QueueWrapper h a) where
-    mappend (QueueWrapper xs) (QueueWrapper ys) = QueueWrapper (merge xs ys)
-    mempty = QueueWrapper empty
+    fromFoldable :: (Foldable f, Suitable h a) => f a -> h a

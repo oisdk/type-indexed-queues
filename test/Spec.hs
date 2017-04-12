@@ -52,10 +52,10 @@ properBinomial = go 1 where
   properNode (t :< ts) = properTree t && properNode ts
   properNode NilN      = True
 
-fromList' :: PriorityQueue h => [Int] -> h Int
+fromList' :: (PriorityQueue h, Suitable h Int) => [Int] -> h Int
 fromList' = fromList
 
-propHeapSort :: PriorityQueue h => p h -> TestTree
+propHeapSort :: (PriorityQueue h, Suitable h Int) => p h -> TestTree
 propHeapSort p =
     testProperty "sort" $
     \xs ->
