@@ -1,7 +1,9 @@
-{-# LANGUAGE DataKinds           #-}
-{-# LANGUAGE GADTs               #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE TypeOperators         #-}
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
@@ -11,7 +13,7 @@ import           Data.Proxy
 import           Data.Type.Equality
 import           GHC.TypeLits
 
-import           Data.Heap.Indexed.Class hiding (MeldableIndexedQueue(..))
+import           Data.Heap.Indexed.Class hiding (MeldableIndexedQueue (..))
 
 data Braun n a where
         Leaf :: Braun 0 a
@@ -22,7 +24,7 @@ data Offset n m where
         Even :: Offset n n
         Lean :: Offset (1 + n) n
 
-instance IndexedPriorityQueue Braun where
+instance Ord a => IndexedPriorityQueue Braun a where
 
   insert x Leaf = Node Even x Leaf Leaf
   insert x (Node o y l r)
@@ -36,7 +38,7 @@ instance IndexedPriorityQueue Braun where
 
   minView (Node o x l r) = (x, merge o l r)
 
-  minViewMay Leaf b _ = b
+  minViewMay Leaf b _           = b
   minViewMay (Node o x l r) _ f = f x (merge o l r)
 
   singleton x = Node Even x Leaf Leaf

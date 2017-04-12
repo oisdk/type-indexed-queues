@@ -1,11 +1,12 @@
 {-# LANGUAGE BangPatterns          #-}
 {-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE GADTs                 #-}
 {-# LANGUAGE KindSignatures        #-}
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances     #-}
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
@@ -38,7 +39,7 @@ data Binomial :: Nat -> Nat -> * -> * where
         Skip :: Binomial (1 + z) (1 + xs) a
              -> Binomial z (2 + xs + xs) a
 
-instance IndexedPriorityQueue (Binomial 0) where
+instance Ord a => IndexedPriorityQueue (Binomial 0) a where
     empty = Nil
     minView xs = case minViewZip xs of
       Zipper x _ ys -> (x, ys)
@@ -49,7 +50,7 @@ instance IndexedPriorityQueue (Binomial 0) where
       _ :- _ -> uncurry f (minView q)
       Skip _ -> uncurry f (minView q)
 
-instance MeldableIndexedQueue (Binomial 0) where
+instance Ord a => MeldableIndexedQueue (Binomial 0) a where
     merge = mergeB
     {-# INLINE merge #-}
 

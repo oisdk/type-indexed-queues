@@ -1,3 +1,6 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances     #-}
+
 module Data.Heap.Leftist where
 
 import Data.Heap.Class
@@ -14,7 +17,7 @@ rank Empty          = 0
 rank (Node r _ _ _) = r
 {-# INLINE rank #-}
 
-instance PriorityQueue Leftist where
+instance Ord a => PriorityQueue Leftist a where
 
     minView Empty          = Nothing
     minView (Node _ x l r) = Just (x, merge l r)
@@ -29,7 +32,7 @@ instance PriorityQueue Leftist where
     insert = merge . singleton
     {-# INLINE insert #-}
 
-instance MeldableQueue Leftist where
+instance Ord a => MeldableQueue Leftist a where
     merge Empty h2 = h2
     merge h1 Empty = h1
     merge t1@(Node _ x1 l1 r1) t2@(Node _ x2 l2 r2)

@@ -1,10 +1,11 @@
-{-# LANGUAGE BangPatterns       #-}
-{-# LANGUAGE DataKinds          #-}
-{-# LANGUAGE FlexibleInstances  #-}
-{-# LANGUAGE GADTs              #-}
-{-# LANGUAGE RankNTypes         #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE DeriveFoldable     #-}
+{-# LANGUAGE BangPatterns          #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE DeriveFoldable        #-}
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes            #-}
+{-# LANGUAGE StandaloneDeriving    #-}
 
 module Data.Heap.Binomial where
 
@@ -82,7 +83,7 @@ minViewZip (t@(Root x ts) :- f) =
           | minKey < x -> Min minKey (pushLeft t ex)
         _ -> Min x (Zipper ts (Skip f))
 
-instance PriorityQueue (Binomial 'Z) where
+instance Ord a => PriorityQueue (Binomial 'Z) a where
     minView hs =
         case minViewZip hs of
             Infty               -> Nothing
@@ -92,6 +93,6 @@ instance PriorityQueue (Binomial 'Z) where
     empty = mempty
     {-# INLINE empty #-}
 
-instance MeldableQueue (Binomial 'Z) where
+instance Ord a => MeldableQueue (Binomial 'Z) a where
     merge = mappend
     {-# INLINE merge #-}

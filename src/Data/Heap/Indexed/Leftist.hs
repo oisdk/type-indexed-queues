@@ -1,6 +1,8 @@
-{-# LANGUAGE DataKinds     #-}
-{-# LANGUAGE GADTs         #-}
-{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE FlexibleInstances     #-}
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
@@ -22,7 +24,7 @@ rank Empty          = 0
 rank (Node r _ _ _) = r
 {-# INLINE rank #-}
 
-instance IndexedPriorityQueue Leftist where
+instance Ord a => IndexedPriorityQueue Leftist a where
 
     minView (Node _ x l r) = (x, merge l r)
     {-# INLINE minView #-}
@@ -36,10 +38,10 @@ instance IndexedPriorityQueue Leftist where
     insert = merge . singleton
     {-# INLINE insert #-}
 
-    minViewMay Empty b _ = b
+    minViewMay Empty b _          = b
     minViewMay (Node _ x l r) _ f = f x (merge l r)
 
-instance MeldableIndexedQueue Leftist where
+instance Ord a => MeldableIndexedQueue Leftist a where
     merge Empty h2 = h2
     merge h1 Empty = h1
     merge t1@(Node _ x1 l1 r1) t2@(Node _ x2 l2 r2)

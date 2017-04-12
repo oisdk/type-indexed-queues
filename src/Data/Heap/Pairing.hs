@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Data.Heap.Pairing
   (Pairing(..))
   where
@@ -15,7 +18,7 @@ instance Ord a => Monoid (Pairing a) where
       | otherwise = T y (h1 : ys)
     {-# INLINABLE mappend #-}
 
-instance PriorityQueue Pairing where
+instance Ord a => PriorityQueue Pairing a where
     singleton a = T a []
     insert = mappend . singleton
     {-# INLINABLE insert #-}
@@ -25,7 +28,7 @@ instance PriorityQueue Pairing where
     empty = mempty
     {-# INLINE empty #-}
 
-instance MeldableQueue Pairing where
+instance Ord a => MeldableQueue Pairing a where
     merge = mappend
     {-# INLINE merge #-}
 

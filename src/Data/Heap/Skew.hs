@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Data.Heap.Skew where
 
 import           Data.BinaryTree
@@ -18,12 +21,12 @@ smerge h1@(Node x lx rx) h2@(Node y ly ry)
   | x <= y    = Node x (smerge h2 rx) lx
   | otherwise = Node y (smerge h1 ry) ly
 
-instance PriorityQueue Skew where
+instance Ord a => PriorityQueue Skew a where
     singleton x = Skew (Node x Leaf Leaf)
-    minView (Skew Leaf) = Nothing
+    minView (Skew Leaf)         = Nothing
     minView (Skew (Node x l r)) = Just (x, Skew (smerge l r))
     empty = mempty
     insert = merge . singleton
 
-instance MeldableQueue Skew where
+instance Ord a => MeldableQueue Skew a where
     merge = mappend

@@ -2,6 +2,7 @@
 {-# LANGUAGE GADTs               #-}
 {-# LANGUAGE RankNTypes          #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleContexts    #-}
 
 module Main (main) where
 
@@ -52,10 +53,10 @@ properBinomial = go 1 where
   properNode (t :< ts) = properTree t && properNode ts
   properNode NilN      = True
 
-fromList' :: (PriorityQueue h, Suitable h Int) => [Int] -> h Int
+fromList' :: (PriorityQueue h Int) => [Int] -> h Int
 fromList' = fromList
 
-propHeapSort :: (PriorityQueue h, Suitable h Int) => p h -> TestTree
+propHeapSort :: (PriorityQueue h Int) => p h -> TestTree
 propHeapSort p =
     testProperty "sort" $
     \xs ->
@@ -68,7 +69,7 @@ properBraun (Braun (Node x l r)) =
     length l <= length r + 1 &&
     all (x <=) l && all (x <=) r && properBraun (Braun l) && properBraun (Braun r)
 
-indexedSort :: IndexedPriorityQueue h => Proxy h -> TestTree
+indexedSort :: IndexedPriorityQueue h Int => Proxy h -> TestTree
 indexedSort (_ :: Proxy h) =
     testProperty
         "sort"

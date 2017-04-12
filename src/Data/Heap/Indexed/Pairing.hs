@@ -1,5 +1,7 @@
 {-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RoleAnnotations       #-}
 {-# LANGUAGE TypeOperators         #-}
 
@@ -22,7 +24,7 @@ data HVec n a where
   HNil :: HVec 0 a
   HCons :: Pairing m a -> HVec n a -> HVec (m + n) a
 
-instance IndexedPriorityQueue Pairing where
+instance Ord a => IndexedPriorityQueue Pairing a where
     minView (T x hs) = (x, mergePairs hs)
     {-# INLINABLE minView #-}
     singleton a = T a HNil
@@ -30,10 +32,10 @@ instance IndexedPriorityQueue Pairing where
     insert = merge . singleton
     {-# INLINABLE insert #-}
 
-    minViewMay E b _ = b
+    minViewMay E b _        = b
     minViewMay (T x hs) _ f = f x (mergePairs hs)
 
-instance MeldableIndexedQueue Pairing where
+instance Ord a => MeldableIndexedQueue Pairing a where
     merge E ys = ys
     merge xs E = xs
     merge h1@(T x xs) h2@(T y ys)

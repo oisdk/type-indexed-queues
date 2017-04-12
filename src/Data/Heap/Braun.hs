@@ -1,3 +1,6 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances     #-}
+
 module Data.Heap.Braun where
 
 import Data.BinaryTree
@@ -11,7 +14,7 @@ insertTree x (Node y l r)
     | x <= y    = Node x (insertTree y r) l
     | otherwise = Node y (insertTree x r) l
 
-instance PriorityQueue Braun where
+instance Ord a => PriorityQueue Braun a where
     insert x (Braun ys) = Braun (insertTree x ys)
     empty = Braun Leaf
     minView (Braun xs) = (fmap.fmap) Braun (minViewTree xs)

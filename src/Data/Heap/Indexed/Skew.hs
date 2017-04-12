@@ -1,5 +1,7 @@
 {-# LANGUAGE DataKinds             #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE GADTs                 #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators         #-}
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
@@ -14,15 +16,15 @@ data Skew n a where
         Empty :: Skew 0 a
         Node :: a -> Skew n a -> Skew m a -> Skew (1 + n + m) a
 
-instance IndexedPriorityQueue Skew where
+instance Ord a => IndexedPriorityQueue Skew a where
     empty = Empty
     singleton x = Node x Empty Empty
     minView (Node x l r) = (x, merge l r)
     insert = merge . singleton
-    minViewMay Empty b _ = b
+    minViewMay Empty b _        = b
     minViewMay (Node x l r) _ f = f x (merge l r)
 
-instance MeldableIndexedQueue Skew where
+instance Ord a => MeldableIndexedQueue Skew a where
     merge Empty ys = ys
     merge xs Empty = xs
     merge h1@(Node x lx rx) h2@(Node y ly ry)
