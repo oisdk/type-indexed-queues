@@ -10,7 +10,11 @@
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
-module Data.Heap.Indexed.Binomial where
+module Data.Heap.Indexed.Binomial
+  (Tree(..)
+  ,Node(..)
+  ,Binomial(..))
+  where
 
 import           GHC.TypeLits
 
@@ -54,7 +58,9 @@ instance Ord a => MeldableIndexedQueue (Binomial 0) a where
     merge = mergeB
     {-# INLINE merge #-}
 
-mergeB :: Ord a => Binomial z xs a -> Binomial z ys a -> Binomial z (xs + ys) a
+mergeB
+    :: Ord a
+    => Binomial z xs a -> Binomial z ys a -> Binomial z (xs + ys) a
 mergeB Nil ys              = ys
 mergeB xs Nil              = xs
 mergeB (Skip xs) (Skip ys) = Skip (mergeB xs ys)
@@ -62,7 +68,12 @@ mergeB (Skip xs) (y :- ys) = y :- mergeB xs ys
 mergeB (x :- xs) (Skip ys) = x :- mergeB xs ys
 mergeB (x :- xs) (y :- ys) = Skip (mergeCarry (mergeTree x y) xs ys)
 
-mergeCarry :: Ord a => Tree z a -> Binomial z xs a -> Binomial z ys a -> Binomial z (1 + xs + ys) a
+mergeCarry
+    :: Ord a
+    => Tree z a
+    -> Binomial z xs a
+    -> Binomial z ys a
+    -> Binomial z (1 + xs + ys) a
 mergeCarry !t Nil ys              = carryLonger t ys
 mergeCarry !t xs Nil              = carryLonger t xs
 mergeCarry !t (Skip xs) (Skip ys) = t :- mergeB xs ys

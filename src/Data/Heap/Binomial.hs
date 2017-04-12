@@ -7,6 +7,7 @@
 {-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE StandaloneDeriving    #-}
 
+-- | Simple binomial heaps, with a statically-enforced shape.
 module Data.Heap.Binomial
   (Binomial(..)
   ,Node(..)
@@ -18,6 +19,14 @@ import           TypeLevel.Nat
 import           Data.Heap.Class
 
 infixr 5 :-
+-- | A binomial heap, where the sizes of the nodes are enforced in the types.
+--
+-- The implementation is based on:
+--
+-- * <http://www.cs.ox.ac.uk/ralf.hinze/publications/#J1 Hinze, Ralf. “Functional Pearls: Explaining Binomial Heaps.” Journal of Functional Programming 9, no. 1 (January 1999): 93–104. doi:10.1017/S0956796899003317.>
+-- * <https://themonadreader.files.wordpress.com/2010/05/issue16.pdf Wasserman, Louis. “Playing with Priority Queues.” The Monad.Reader, May 12, 2010.>
+
+
 data Binomial rk a
     = Nil
     | Skip (Binomial ('S rk) a)

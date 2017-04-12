@@ -6,7 +6,9 @@
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
-module Data.Heap.Indexed.Leftist where
+module Data.Heap.Indexed.Leftist
+  (Leftist(..))
+  where
 
 import           Data.Heap.Indexed.Class
 import           GHC.TypeLits

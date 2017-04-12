@@ -7,7 +7,10 @@
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
-module Data.Heap.Indexed.Braun where
+module Data.Heap.Indexed.Braun
+  (Braun(..)
+  ,Offset(..))
+  where
 
 import           Data.Proxy
 import           Data.Type.Equality
