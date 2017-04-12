@@ -18,9 +18,12 @@ smerge h1@(Node x lx rx) h2@(Node y ly ry)
   | x <= y    = Node x (smerge h2 rx) lx
   | otherwise = Node y (smerge h1 ry) ly
 
-instance MinHeap Skew where
+instance PriorityQueue Skew where
     singleton x = Skew (Node x Leaf Leaf)
     minView (Skew Leaf) = Nothing
     minView (Skew (Node x l r)) = Just (x, Skew (smerge l r))
     empty = mempty
+    insert = merge . singleton
+
+instance MeldableQueue Skew where
     merge = mappend

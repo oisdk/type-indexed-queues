@@ -38,13 +38,16 @@ data Binomial :: Nat -> Nat -> * -> * where
         Skip :: Binomial (1 + z) (1 + xs) a
              -> Binomial z (2 + xs + xs) a
 
-instance IndexedHeap (Binomial 0) where
-    merge = mergeB
-    {-# INLINE merge #-}
+instance IndexedPriorityQueue (Binomial 0) where
     empty = Nil
     minView xs = case minViewZip xs of
       Zipper x _ ys -> (x, ys)
     singleton x = Root x NilN :- Nil
+    insert = merge . singleton
+
+instance MeldableIndexedPriorityQueue (Binomial 0) where
+    merge = mergeB
+    {-# INLINE merge #-}
 
 mergeB :: Ord a => Binomial z xs a -> Binomial z ys a -> Binomial z (xs + ys) a
 mergeB Nil ys              = ys

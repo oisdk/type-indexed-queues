@@ -12,17 +12,19 @@ import           Test.Tasty.QuickCheck
 import           Data.BinaryTree
 import           Data.Heap.Binomial    hiding (Tree)
 import qualified Data.Heap.Binomial    as Binomial
-import           Data.Heap.Braun       (Braun)
-import qualified Data.Heap.Braun       as Braun
+import           Data.Heap.Braun       (Braun(..))
+-- import qualified Data.Heap.Braun       as Braun
 -- import qualified Data.Heap.Leftist     as Leftist
 -- import           Data.Heap.Pairing
 -- import           Data.Heap.Skew
+
+import qualified Data.Heap.Indexed.Braun as Indexed
 
 import           Data.Heap.Class
 
 import           TypeLevel.Nat
 
-import           Data.List             (sort, unfoldr)
+import           Data.List             (sort)
 
 import           Data.Proxy
 
@@ -40,21 +42,21 @@ properBinomial = go 1 where
   properNode (t :< ts) = properTree t && properNode ts
   properNode NilN      = True
 
-fromList' :: MinHeap h => [Int] -> h Int
+fromList' :: PriorityQueue h => [Int] -> h Int
 fromList' = fromList
 
-propHeapSort :: MinHeap h => p h -> TestTree
+propHeapSort :: PriorityQueue h => p h -> TestTree
 propHeapSort p =
     testProperty "sort" $
     \xs ->
          heapSort p (xs :: [Int]) === sort xs
 
 properBraun :: Ord a => Braun a -> Bool
-properBraun Leaf = True
-properBraun (Node x l r) =
+properBraun (Braun Leaf) = True
+properBraun (Braun (Node x l r)) =
     length r <= length l &&
     length l <= length r + 1 &&
-    all (x <=) l && all (x <=) r && properBraun l && properBraun r
+    all (x <=) l && all (x <=) r && properBraun (Braun l) && properBraun (Braun r)
 
 main :: IO ()
 main = do
@@ -70,13 +72,19 @@ main = do
                   "Braun"
                   [ testProperty
                         "proper"
-                        (properBraun . foldr Braun.insert Leaf :: [Int] -> Bool)
+                        (properBraun . fromList :: [Int] -> Bool)
                   , testProperty
                         "sort"
                         (\xs ->
-                              (unfoldr Braun.minView . foldr Braun.insert Leaf)
+                              heapSort (Proxy :: Proxy Braun)
                                   (xs :: [Int]) ===
                               sort xs)]
+            -- , testGroup
+            --       "Indexed Braun"
+            --       [ testProperty
+            --             "sort"
+            --             (\xs ->
+            --                   Indexed.braunSort (xs :: [Int]) === sort xs)]
             , testGroup
                   "Tree"
                   [ testProperty "readshow" $

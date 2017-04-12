@@ -18,17 +18,19 @@ instance Ord a => Monoid (Pairing a) where
       | otherwise = T y (h1 : ys)
     {-# INLINABLE mappend #-}
 
-instance MinHeap Pairing where
+instance PriorityQueue Pairing where
     singleton a = T a []
     insert = mappend . singleton
     {-# INLINABLE insert #-}
     minView (T x hs) = Just (x, mergePairs hs)
     minView E        = Nothing
     {-# INLINABLE minView #-}
-    merge = mappend
-    {-# INLINE merge #-}
     empty = mempty
     {-# INLINE empty #-}
+
+instance MeldableQueue Pairing where
+    merge = mappend
+    {-# INLINE merge #-}
 
 mergePairs :: Ord a => [Pairing a] -> Pairing a
 mergePairs [] = E

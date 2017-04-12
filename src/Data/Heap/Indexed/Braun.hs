@@ -7,9 +7,11 @@
 
 module Data.Heap.Indexed.Braun where
 
+import           Data.Proxy
 import           Data.Type.Equality
 import           GHC.TypeLits
-import           Data.Proxy
+
+import           Data.Heap.Indexed.Class hiding (MeldableIndexedPriorityQueue(..))
 
 data Braun n a where
         Leaf :: Braun 0 a
@@ -20,14 +22,21 @@ data Offset n m where
         Even :: Offset n n
         Lean :: Offset (1 + n) n
 
-insert :: Ord a => a -> Braun n a -> Braun (n + 1) a
-insert x Leaf = Node Even x Leaf Leaf
-insert x (Node o y l r)
-  | x <= y    = Node n x (insert y r) l
-  | otherwise = Node n y (insert x r) l
-  where n = case o of
-          Even -> Lean
-          Lean -> Even
+instance IndexedPriorityQueue Braun where
+
+  insert x Leaf = Node Even x Leaf Leaf
+  insert x (Node o y l r)
+    | x <= y    = Node n x (insert y r) l
+    | otherwise = Node n y (insert x r) l
+    where n = case o of
+            Even -> Lean
+            Lean -> Even
+
+  empty = Leaf
+
+  minView (Node o x l r) = (x, merge o l r)
+
+  singleton x = Node Even x Leaf Leaf
 
 extract :: Ord a => Braun (n + 1) a -> (a, Braun n a)
 extract (Node o y l r) =
@@ -78,3 +87,4 @@ mergeLean l@(Node lo lx (ll :: Braun n1 a) (lr :: Braun m a)) r@(Node _ ly _ _ :
            p x -> p y -> p z -> (x + 1) :~: ((y + z) + 1) -> (y + z) :~: x
     prf _ _ _ Refl = Refl
 mergeLean l Leaf = l
+

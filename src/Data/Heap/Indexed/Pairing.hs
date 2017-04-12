@@ -6,11 +6,7 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 module Data.Heap.Indexed.Pairing
-  (Pairing
-  ,singleton
-  ,insert
-  ,merge
-  ,minView)
+  (Pairing(..))
   where
 
 import           Data.Heap.Indexed.Class
@@ -26,21 +22,21 @@ data HVec n a where
   HNil :: HVec 0 a
   HCons :: Pairing m a -> HVec n a -> HVec (m + n) a
 
-instance IndexedHeap Pairing where
+instance IndexedPriorityQueue Pairing where
+    minView (T x hs) = (x, mergePairs hs)
+    {-# INLINABLE minView #-}
+    singleton a = T a HNil
+    empty = E
+    insert = merge . singleton
+    {-# INLINABLE insert #-}
+
+instance MeldableIndexedPriorityQueue Pairing where
     merge E ys = ys
     merge xs E = xs
     merge h1@(T x xs) h2@(T y ys)
       | x <= y = T x (HCons h2 xs)
       | otherwise = T y (HCons h1 ys)
     {-# INLINABLE merge #-}
-    minView (T x hs) = (x, mergePairs hs)
-    {-# INLINABLE minView #-}
-    singleton a = T a HNil
-    empty = E
-
-insert :: Ord a => a -> Pairing n a -> Pairing (1 + n) a
-insert = merge . singleton
-{-# INLINABLE insert #-}
 
 mergePairs :: Ord a => HVec n a -> Pairing n a
 mergePairs HNil = E

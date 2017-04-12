@@ -4,39 +4,42 @@ module Data.Heap.Class where
 
 import Data.List (unfoldr)
 
-class MinHeap h  where
-    {-# MINIMAL minView , singleton , merge , empty #-}
+class PriorityQueue h  where
+
+    {-# MINIMAL minView , insert , empty #-}
+
     minView
         :: Ord a
         => h a -> Maybe (a, h a)
-    singleton
-        :: Ord a
-        => a -> h a
+
     insert
         :: Ord a
         => a -> h a -> h a
-    insert = merge . singleton
-    merge
-        :: Ord a
-        => h a -> h a -> h a
     empty
         :: Ord a
         => h a
+    singleton
+        :: Ord a
+        => a -> h a
+    singleton = flip insert empty
 
-newtype HeapMonoid h a = HeapMonoid { runHeapMonoid :: h a }
+    toList :: Ord a => h a -> [a]
+    toList = unfoldr minView
 
-instance (MinHeap h, Ord a) => Monoid (HeapMonoid h a) where
-    mappend (HeapMonoid xs) (HeapMonoid ys) = HeapMonoid (merge xs ys)
-    mempty = HeapMonoid empty
+    fromList :: Ord a => [a] -> h a
+    fromList = foldr insert empty
 
-toList :: (Ord a, MinHeap h) => h a -> [a]
-toList = unfoldr minView
+    heapSort :: Ord a => p h -> [a] -> [a]
+    heapSort (_ :: p h) = toList . (fromList :: Ord a => [a] -> h a)
 
-fromList :: (Ord a, MinHeap h) => [a] -> h a
-fromList = foldr insert empty
+class PriorityQueue h => MeldableQueue h where
+    merge :: Ord a => h a -> h a -> h a
 
-fromFoldable :: (MinHeap h, Foldable f, Ord a) => f a -> h a
-fromFoldable = runHeapMonoid . foldMap (HeapMonoid . singleton)
+    fromFoldable :: (Foldable f, Ord a) => f a -> h a
+    fromFoldable = runQueueWrapper . foldMap (QueueWrapper . singleton)
 
-heapSort :: (MinHeap h, Ord a) => p h -> [a] -> [a]
-heapSort (_ :: p h) = toList . (fromList :: Ord a => [a] -> h a)
+newtype QueueWrapper h a = QueueWrapper { runQueueWrapper :: h a }
+
+instance (MeldableQueue h, Ord a) => Monoid (QueueWrapper h a) where
+    mappend (QueueWrapper xs) (QueueWrapper ys) = QueueWrapper (merge xs ys)
+    mempty = QueueWrapper empty

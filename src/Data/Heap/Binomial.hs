@@ -82,14 +82,16 @@ minViewZip (t@(Root x ts) :- f) =
           | minKey < x -> Min minKey (pushLeft t ex)
         _ -> Min x (Zipper ts (Skip f))
 
-instance MinHeap (Binomial 'Z) where
+instance PriorityQueue (Binomial 'Z) where
     minView hs =
         case minViewZip hs of
             Infty               -> Nothing
             Min x (Zipper _ ts) -> Just (x, ts)
     singleton x = Root x NilN :- Nil
     insert x = carryLonger (Root x NilN)
-    merge = mappend
-    {-# INLINE merge #-}
     empty = mempty
     {-# INLINE empty #-}
+
+instance MeldableQueue (Binomial 'Z) where
+    merge = mappend
+    {-# INLINE merge #-}
