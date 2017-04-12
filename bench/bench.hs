@@ -10,6 +10,9 @@ import qualified Data.Heap.Indexed.Binomial as Indexed
 import qualified Data.Heap.Indexed.Pairing  as Indexed
 import qualified Data.Heap.Indexed.Skew     as Indexed
 import qualified Data.Heap.Indexed.Leftist  as Indexed
+import qualified Data.Heap.Indexed.Braun    as Indexed
+
+import           Data.Heap.Indexed.Erased
 
 import           Data.Heap.Binomial
 import           Data.Heap.Pairing
@@ -48,7 +51,8 @@ testSize n =
           \xs ->
                bgroup
                    "list"
-                   [ bench "Data.List"    $ nf sort xs
+                   [ bench "sort braun"   $ nf (heapSort (Proxy :: Proxy (ErasedSize Indexed.Braun))) xs
+                   , bench "Data.List"    $ nf sort xs
                    , bench "sort pairing" $ nf (heapSort (Proxy :: Proxy Pairing)) xs
                    , bench "sort leftist" $ nf (heapSort (Proxy :: Proxy Leftist)) xs
                    , bench "sort binom"   $ nf (heapSort (Proxy :: Proxy (Binomial 'Z))) xs

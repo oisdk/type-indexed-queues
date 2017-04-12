@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds                 #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE KindSignatures            #-}
+{-# LANGUAGE BangPatterns              #-}
 
 module Data.Heap.Indexed.Erased where
 
@@ -14,10 +15,21 @@ data ErasedSize f a = forall (n :: Nat). ErasedSize
     { runErasedSize :: f n a
     }
 
-instance IndexedPriorityQueue h => PriorityQueue (ErasedSize h) where
+instance IndexedPriorityQueue h =>
+         PriorityQueue (ErasedSize h) where
     insert x (ErasedSize xs) = ErasedSize (Indexed.insert x xs)
     empty = ErasedSize Indexed.empty
-    minView (ErasedSize xs) = Indexed.minViewMay xs Nothing (\y ys -> Just (y, ErasedSize ys))
+    minView (ErasedSize xs) =
+        Indexed.minViewMay
+            xs
+            Nothing
+            (\y ys ->
+                  Just (y, ErasedSize ys))
+    fromList = go Indexed.empty where
+      go :: forall h n a. (IndexedPriorityQueue h, Ord a) => h n a -> [a] -> ErasedSize h a
+      go !h [] = ErasedSize h
+      go !h (x : xs) = go (Indexed.insert x h) xs
+
 
 instance MeldableIndexedQueue h => MeldableQueue (ErasedSize h) where
     merge (ErasedSize xs) (ErasedSize ys) = ErasedSize (Indexed.merge xs ys)

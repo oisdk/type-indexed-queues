@@ -16,7 +16,7 @@ import           Data.Heap.Indexed.Class hiding (MeldableIndexedQueue(..))
 data Braun n a where
         Leaf :: Braun 0 a
         Node ::
-          Offset n m -> a -> Braun n a -> Braun m a -> Braun (n + m + 1) a
+          !(Offset n m) -> a -> Braun n a -> Braun m a -> Braun (n + m + 1) a
 
 data Offset n m where
         Even :: Offset n n
@@ -42,15 +42,13 @@ instance IndexedPriorityQueue Braun where
   singleton x = Node Even x Leaf Leaf
 
 extract :: Ord a => Braun (n + 1) a -> (a, Braun n a)
-extract (Node o y l r) =
-    case o of
-        Even ->
-            case l of
-                Leaf -> (y, Leaf)
-                Node{} -> (x, Node Lean y r l')
-                    where (x,l') = extract l
-        Lean -> (x, Node Even y r l')
-            where (x,l') = extract l
+extract (Node Even y Leaf _) = (y, Leaf)
+extract (Node Even y l@Node{} r) = (x, Node Lean y r l')
+  where
+    (x,l') = extract l
+extract (Node Lean y l r) = (x, Node Even y r l')
+  where
+    (x,l') = extract l
 
 replaceMax :: Ord a => a -> Braun (n + 1) a -> Braun (n + 1) a
 replaceMax x (Node o _ Leaf r) = Node o x Leaf r
