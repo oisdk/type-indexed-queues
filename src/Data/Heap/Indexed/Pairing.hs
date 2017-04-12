@@ -30,7 +30,10 @@ instance IndexedPriorityQueue Pairing where
     insert = merge . singleton
     {-# INLINABLE insert #-}
 
-instance MeldableIndexedPriorityQueue Pairing where
+    minViewMay E b _ = b
+    minViewMay (T x hs) _ f = f x (mergePairs hs)
+
+instance MeldableIndexedQueue Pairing where
     merge E ys = ys
     merge xs E = xs
     merge h1@(T x xs) h2@(T y ys)

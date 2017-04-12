@@ -19,8 +19,10 @@ instance IndexedPriorityQueue Skew where
     singleton x = Node x Empty Empty
     minView (Node x l r) = (x, merge l r)
     insert = merge . singleton
+    minViewMay Empty b _ = b
+    minViewMay (Node x l r) _ f = f x (merge l r)
 
-instance MeldableIndexedPriorityQueue Skew where
+instance MeldableIndexedQueue Skew where
     merge Empty ys = ys
     merge xs Empty = xs
     merge h1@(Node x lx rx) h2@(Node y ly ry)

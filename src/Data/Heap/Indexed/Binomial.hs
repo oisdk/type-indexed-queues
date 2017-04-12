@@ -44,8 +44,12 @@ instance IndexedPriorityQueue (Binomial 0) where
       Zipper x _ ys -> (x, ys)
     singleton x = Root x NilN :- Nil
     insert = merge . singleton
+    minViewMay q b f = case q of
+      Nil -> b
+      _ :- _ -> uncurry f (minView q)
+      Skip _ -> uncurry f (minView q)
 
-instance MeldableIndexedPriorityQueue (Binomial 0) where
+instance MeldableIndexedQueue (Binomial 0) where
     merge = mergeB
     {-# INLINE merge #-}
 
@@ -92,14 +96,14 @@ pushLeft c (Zipper m (t :< ts) hs)
 
 minViewZip :: Ord a => Binomial rk (1 + n) a -> Zipper a n rk
 minViewZip (Skip xs) = slideLeft (minViewZip xs)
-minViewZip (t@(Root x ts) :- f) = case minViewMay f of
+minViewZip (t@(Root x ts) :- f) = case minViewZipMay f of
   Min ex@(Zipper minKey _ _) | minKey < x -> pushLeft t ex
   _                          -> Zipper x ts (skip f)
 
-minViewMay :: Ord a => Binomial rk n a -> MinViewZipper a n rk
-minViewMay (Skip xs) = Min (slideLeft (minViewZip xs))
-minViewMay Nil = Infty
-minViewMay (t@(Root x ts) :- f) = Min $ case minViewMay f of
+minViewZipMay :: Ord a => Binomial rk n a -> MinViewZipper a n rk
+minViewZipMay (Skip xs) = Min (slideLeft (minViewZip xs))
+minViewZipMay Nil = Infty
+minViewZipMay (t@(Root x ts) :- f) = Min $ case minViewZipMay f of
   Min ex@(Zipper minKey _ _) | minKey < x -> pushLeft t ex
   _                          -> Zipper x ts (skip f)
 

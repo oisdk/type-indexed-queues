@@ -1,5 +1,7 @@
-{-# LANGUAGE DataKinds             #-}
-{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE DataKinds     #-}
+{-# LANGUAGE RankNTypes    #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeFamilies  #-}
 
 module Data.Heap.Indexed.Class where
 
@@ -7,7 +9,7 @@ import           GHC.TypeLits
 
 class IndexedPriorityQueue h  where
 
-    {-# MINIMAL minView, insert, empty #-}
+    {-# MINIMAL insert, empty, minViewMay, minView #-}
 
     empty
         :: Ord a
@@ -26,8 +28,15 @@ class IndexedPriorityQueue h  where
         :: Ord a
         => a -> h n a -> h (1 + n) a
 
+    minViewMay
+       :: Ord a
+       => h n a
+       -> (n ~ 0 => b)
+       -> (forall m. (1 + m) ~ n => a -> h m a -> b)
+       -> b
+
 class IndexedPriorityQueue h =>
-      MeldableIndexedPriorityQueue h  where
+      MeldableIndexedQueue h  where
     merge
         :: Ord a
         => h n a -> h m a -> h (n + m) a

@@ -22,7 +22,7 @@ instance Functor (Sort f x) where
     Sort (\h' -> case g h' of (remn, r) -> (remn, f r)) h
   {-# INLINE fmap #-}
 
-instance (MeldableIndexedPriorityQueue f, Ord x) => Applicative (Sort f x) where
+instance (MeldableIndexedQueue f, Ord x) => Applicative (Sort f x) where
   pure x = Sort (\h -> (h, x)) empty
   {-# INLINE pure #-}
 
@@ -42,7 +42,7 @@ liftSort a = Sort (\h -> case minView h of (x, h') -> (h', x)) (singleton a)
 runSort :: forall x a f. Sort f x a -> a
 runSort (Sort (f :: f (m + 0) x -> (f 0 x, a)) xs) = snd $ f xs
 
-sortTraversable :: (MeldableIndexedPriorityQueue f, Traversable t, Ord a) => p f -> t a -> t a
+sortTraversable :: (MeldableIndexedQueue f, Traversable t, Ord a) => p f -> t a -> t a
 sortTraversable (_ :: p f) =
     runSort .
     traverse

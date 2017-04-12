@@ -1,6 +1,7 @@
-{-# LANGUAGE DataKinds  #-}
-{-# LANGUAGE GADTs      #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE DataKinds           #-}
+{-# LANGUAGE GADTs               #-}
+{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main (main) where
 
@@ -10,21 +11,26 @@ import           Test.Tasty
 import           Test.Tasty.QuickCheck
 
 import           Data.BinaryTree
-import           Data.Heap.Binomial    hiding (Tree)
-import qualified Data.Heap.Binomial    as Binomial
-import           Data.Heap.Braun       (Braun(..))
--- import qualified Data.Heap.Braun       as Braun
--- import qualified Data.Heap.Leftist     as Leftist
--- import           Data.Heap.Pairing
--- import           Data.Heap.Skew
+import           Data.Heap.Binomial         hiding (Tree)
+import qualified Data.Heap.Binomial         as Binomial
+import           Data.Heap.Braun            (Braun (..))
+import           Data.Heap.Pairing          (Pairing)
+import           Data.Heap.Leftist          (Leftist)
+import           Data.Heap.Skew
 
-import qualified Data.Heap.Indexed.Braun as Indexed
+import qualified Data.Heap.Indexed.Binomial as Indexed
+import qualified Data.Heap.Indexed.Braun    as Indexed
+import qualified Data.Heap.Indexed.Leftist  as Indexed
+import qualified Data.Heap.Indexed.Pairing  as Indexed
+import qualified Data.Heap.Indexed.Skew     as Indexed
+import           Data.Heap.Indexed.Erased
 
 import           Data.Heap.Class
+import           Data.Heap.Indexed.Class
 
 import           TypeLevel.Nat
 
-import           Data.List             (sort)
+import           Data.List                  (sort)
 
 import           Data.Proxy
 
@@ -58,6 +64,14 @@ properBraun (Braun (Node x l r)) =
     length l <= length r + 1 &&
     all (x <=) l && all (x <=) r && properBraun (Braun l) && properBraun (Braun r)
 
+indexedSort :: IndexedPriorityQueue h => Proxy h -> TestTree
+indexedSort (_ :: Proxy h) =
+    testProperty
+        "sort"
+        (\xs ->
+              heapSort (Proxy :: Proxy (ErasedSize h)) (xs :: [Int]) ===
+              sort xs)
+
 main :: IO ()
 main = do
     doctest ["-isrc", "src"]
@@ -65,26 +79,37 @@ main = do
         testGroup
             "Tests"
             [ testGroup
-                  "Binomial heap"
+                  "Binomial"
                   [ testProperty "proper" (properBinomial . fromList')
                   , propHeapSort (Proxy :: Proxy (Binomial 'Z))]
             , testGroup
                   "Braun"
-                  [ testProperty
-                        "proper"
-                        (properBraun . fromList :: [Int] -> Bool)
-                  , testProperty
-                        "sort"
-                        (\xs ->
-                              heapSort (Proxy :: Proxy Braun)
-                                  (xs :: [Int]) ===
-                              sort xs)]
-            -- , testGroup
-            --       "Indexed Braun"
-            --       [ testProperty
-            --             "sort"
-            --             (\xs ->
-            --                   Indexed.braunSort (xs :: [Int]) === sort xs)]
+                  [ testProperty "proper" (properBraun . fromList :: [Int] -> Bool)
+                  , propHeapSort (Proxy :: Proxy Braun) ]
+            , testGroup
+                  "Leftist"
+                  [ propHeapSort (Proxy :: Proxy Leftist) ]
+            , testGroup
+                  "Pairing"
+                  [ propHeapSort (Proxy :: Proxy Pairing) ]
+            , testGroup
+                  "Skew"
+                  [ propHeapSort (Proxy :: Proxy Skew) ]
+            , testGroup
+                  "Indexed Braun"
+                  [ indexedSort (Proxy :: Proxy Indexed.Braun) ]
+            , testGroup
+                  "Indexed Binomial"
+                  [ indexedSort (Proxy :: Proxy (Indexed.Binomial 0)) ]
+            , testGroup
+                  "Indexed Leftist"
+                  [ indexedSort (Proxy :: Proxy Indexed.Leftist) ]
+            , testGroup
+                  "Indexed Pairing"
+                  [ indexedSort (Proxy :: Proxy Indexed.Pairing) ]
+            , testGroup
+                  "Indexed Skew"
+                  [ indexedSort (Proxy :: Proxy Indexed.Skew) ]
             , testGroup
                   "Tree"
                   [ testProperty "readshow" $

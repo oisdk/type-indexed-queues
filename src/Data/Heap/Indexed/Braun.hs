@@ -11,7 +11,7 @@ import           Data.Proxy
 import           Data.Type.Equality
 import           GHC.TypeLits
 
-import           Data.Heap.Indexed.Class hiding (MeldableIndexedPriorityQueue(..))
+import           Data.Heap.Indexed.Class hiding (MeldableIndexedQueue(..))
 
 data Braun n a where
         Leaf :: Braun 0 a
@@ -35,6 +35,9 @@ instance IndexedPriorityQueue Braun where
   empty = Leaf
 
   minView (Node o x l r) = (x, merge o l r)
+
+  minViewMay Leaf b _ = b
+  minViewMay (Node o x l r) _ f = f x (merge o l r)
 
   singleton x = Node Even x Leaf Leaf
 

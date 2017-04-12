@@ -36,7 +36,10 @@ instance IndexedPriorityQueue Leftist where
     insert = merge . singleton
     {-# INLINE insert #-}
 
-instance MeldableIndexedPriorityQueue Leftist where
+    minViewMay Empty b _ = b
+    minViewMay (Node _ x l r) _ f = f x (merge l r)
+
+instance MeldableIndexedQueue Leftist where
     merge Empty h2 = h2
     merge h1 Empty = h1
     merge t1@(Node _ x1 l1 r1) t2@(Node _ x2 l2 r2)
