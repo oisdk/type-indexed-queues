@@ -13,6 +13,7 @@ import           Data.Monoid
 import           Data.Typeable        (Typeable)
 import           GHC.Generics         (Generic, Generic1)
 
+-- | A simple binary tree for use in some of the heaps.
 data Tree a
     = Leaf
     | Node a
@@ -71,17 +72,23 @@ instance Read1 Tree where
                       , (rx,zs) <- go 11 ys ])
                 ss
 
+-- | Fold over a tree.
 foldTree :: b -> (a -> b -> b -> b) -> Tree a -> b
 foldTree b f = go where
   go Leaf         = b
   go (Node x l r) = f x (go l) (go r)
 
+-- | Unfold a tree from a seed.
 unfoldTree :: (b -> Maybe (a, b, b)) -> b -> Tree a
 unfoldTree f = go where
   go = maybe Leaf (\(x,l,r) -> Node x (go l) (go r)) . f
 
-replicate :: Int -> a -> Tree a
-replicate n x = go n
+-- | @'replicateTree' n a@ creates a tree of size @n@ filled @a@.
+--
+-- >>> replicateTree 4 't'
+-- Node 't' (Node 't' (Node 't' Leaf Leaf) Leaf) (Node 't' Leaf Leaf)
+replicateTree :: Int -> a -> Tree a
+replicateTree n x = go n
   where
     go m
       | m <= 0 = Leaf
@@ -92,6 +99,7 @@ replicate n x = go n
                   in Node x r r
               (e,_) -> Node x (go e) (go (e - 1))
 
+-- | @'replicateA' n a@ replicates the action @a@ @n@ times.
 replicateA :: Applicative f => Int -> f a -> f (Tree a)
 replicateA n x = go n
   where

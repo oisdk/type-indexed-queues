@@ -37,7 +37,7 @@ import           Data.List                  (sort)
 
 import           Data.Proxy
 
-import           Data.Functor.Classes       (liftShowsPrec)
+import           Data.Functor.Classes
 
 properBinomial :: Ord a => Binomial 'Z a -> Bool
 properBinomial = go 1 where
@@ -67,7 +67,8 @@ properBraun (Braun Leaf) = True
 properBraun (Braun (Node x l r)) =
     length r <= length l &&
     length l <= length r + 1 &&
-    all (x <=) l && all (x <=) r && properBraun (Braun l) && properBraun (Braun r)
+    all (x <=) l &&
+    all (x <=) r && properBraun (Braun l) && properBraun (Braun r)
 
 indexedSort :: IndexedPriorityQueue h Int => Proxy h -> TestTree
 indexedSort (_ :: Proxy h) =
@@ -82,6 +83,52 @@ intTree = sized (`replicateA` arbitrary)
 
 intRoseTree :: Gen (Rose.Tree Int)
 intRoseTree = sized (`Rose.replicateA` arbitrary)
+
+reflexiveEq :: (Eq a, Show a) => Gen a -> Property
+reflexiveEq xs = forAll xs (\x -> x === x)
+
+symmetricEq :: (Eq a, Show a) => Gen a -> Property
+symmetricEq xs =
+    forAll xs $
+    \x ->
+         forAll xs $
+         \y ->
+              (x == y) == (y == x)
+
+equalityProps :: (Eq a, Show a) => Gen a -> TestTree
+equalityProps xs =
+    testGroup
+        "equality"
+        [ testProperty "reflexive" (reflexiveEq xs)
+        , testProperty "symmetric" (symmetricEq xs)]
+
+readShow :: (Eq a, Read a, Show a) => Gen a -> TestTree
+readShow xs =
+    testProperty "read . show" $
+    forAll xs $
+    \x ->
+         (read . show) x === x
+
+-- | Test that manual Read1 / Show1 classes are equivalent to derived read/show.
+readShow1
+    :: (Read1 f, Show1 f, Show (f a), Show a, Read a, Read (f a), Eq (f a))
+    => Gen (f a) -> TestTree
+readShow1 (xs :: Gen (f a)) =
+    testGroup
+        "readshow1"
+        [ testProperty "show1" $
+          forAll xs $
+          \x ->
+               manualShow x === show x
+        , testProperty "read1 . show1" $
+          forAll xs $
+          \x ->
+               forAll arbitrary $
+               \n ->
+                    (liftReadsPrec readsPrec readList n . manualShow) x ===
+                    ((readsPrec n . show) x :: [(f a, String)])]
+  where
+    manualShow x = liftShowsPrec showsPrec showList 0 x ""
 
 main :: IO ()
 main = do
@@ -123,20 +170,12 @@ main = do
                   [ indexedSort (Proxy :: Proxy Indexed.Skew) ]
             , testGroup
                   "Binary Tree"
-                  [ testProperty "readshow" $
-                    forAll intTree $
-                    \xs ->
-                         (read . show) xs === xs
-                  , testProperty "show" $
-                    forAll intTree $
-                    \xs -> liftShowsPrec showsPrec showList 0 xs "" === show xs]
+                  [ readShow intTree
+                  , readShow1 intTree
+                  , equalityProps intTree ]
             , testGroup
                   "Rose Tree"
-                  [ testProperty "readshow" $
-                    forAll intRoseTree $
-                    \xs ->
-                         (read . show) xs === xs
-                  , testProperty "show" $
-                    forAll intRoseTree $
-                    \xs -> liftShowsPrec showsPrec showList 0 xs "" === show xs]
+                  [ readShow intRoseTree
+                  , readShow1 intRoseTree
+                  , equalityProps intRoseTree ]
             ]
