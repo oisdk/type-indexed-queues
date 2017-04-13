@@ -33,6 +33,11 @@ import           Control.DeepSeq (NFData(rnf))
 -- in the size of the structure, but these are backed by
 -- 'Numeric.Natural.Natural' at runtime, maintaining some
 -- efficiency.
+--
+-- For instance, the '<=.' function is used, which compares two
+-- numbers (runtime integers), but provides a boolean singleton
+-- as its result: when matched on, this provides a /type-level-proof/
+-- of the ordering.
 data Leftist n a where
         Leaf :: Leftist 0 a
         Node :: !(The Nat (n + m + 1))

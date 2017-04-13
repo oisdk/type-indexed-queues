@@ -6,7 +6,10 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances   #-}
 
--- | Provides singletons and general type-level utilities.
+-- | Provides singletons and general type-level utilities. singletons
+-- are value-level representations of types.
+--
+-- <http://cs.brynmawr.edu/~rae/papers/2012/singletons/paper.pdf Eisenberg, Richard A., and Stephanie Weirich. “Dependently Typed Programming with Singletons.” In Proceedings of the 2012 Haskell Symposium, 117–130. Haskell ’12. New York, NY, USA: ACM, 2012. doi:10.1145/2364506.2364522.>
 module TypeLevel.Singletons
   (The(Truey, Falsy, Nily, (:-))
   ,KnownSing(..)
