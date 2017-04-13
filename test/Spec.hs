@@ -92,14 +92,14 @@ leftist =
     zygoLeftist
         (Nothing, 0)
         (\_ x (_,ls) (_,rs) ->
-              (Just x, succ (min ls rs)))
+              (Just x, succ (ls + rs)))
         True
         go
   where
     go i x (lval,ls) lproper (rval,rs) rproper =
         isAbove x lval &&
         isAbove x rval &&
-        lproper && rproper && i == succ (min ls rs) && rs <= ls
+        lproper && rproper && i == succ (ls + rs) && rs <= ls
 
 intTree :: Gen (Tree Int)
 intTree = sized (`replicateA` arbitrary)

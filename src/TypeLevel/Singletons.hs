@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeInType    #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeFamilies  #-}
 {-# LANGUAGE GADTs         #-}
 {-# LANGUAGE TypeOperators #-}
@@ -87,5 +88,6 @@ infix 4 <=.
       Refl -> Falsy
 {-# INLINE (<=.) #-}
 
-totalOrder :: Proxy n -> Proxy m -> ((n Lit.<=? m) :~: 'False) -> ((m Lit.<=? n) :~: 'True)
-totalOrder _ _ Refl = unsafeCoerce Refl
+totalOrder :: ((n Lit.<=? m) ~ 'False) => p n -> q m -> ((m Lit.<=? n) ~ 'True => b) -> b
+totalOrder (_ :: p n) (_ :: q m) = case unsafeCoerce Refl :: (m Lit.<=? n) :~: 'True of
+  Refl -> \x -> x
