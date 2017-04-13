@@ -31,7 +31,7 @@ import Unsafe.Coerce
 
 -- | A data family for singletons. The cute name allows code like this:
 --
--- @addZeroZero :: The Nat n -> x + 0 :~: x@
+-- @addZeroZero :: The Nat n -> n + 0 :~: n@
 --
 data family The k :: k -> *
 
