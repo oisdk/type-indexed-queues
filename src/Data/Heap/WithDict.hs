@@ -6,6 +6,7 @@
 {-# LANGUAGE StandaloneDeriving    #-}
 {-# LANGUAGE DeriveDataTypeable    #-}
 
+-- | Provides a wrapper for queues, allowing them to conform to 'Foldable'.
 module Data.Heap.WithDict
   (WithDict(..))
   where

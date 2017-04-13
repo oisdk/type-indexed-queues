@@ -6,6 +6,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+-- | Leftist heaps.
 module Data.Heap.Leftist
   (Leftist(..)
   ,zygoLeftist)
@@ -18,6 +19,7 @@ import           Data.Data       (Data)
 import           Data.Typeable   (Typeable)
 import           GHC.Generics    (Generic, Generic1)
 
+-- | A simple, unchecked leftist heap.
 data Leftist a
     = Leaf
     | Node {-# UNPACK #-} !Int

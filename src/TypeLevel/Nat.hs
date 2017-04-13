@@ -1,5 +1,4 @@
 {-# LANGUAGE TypeFamilies  #-}
-{-# LANGUAGE Safe          #-}
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE GADTs         #-}
 {-# LANGUAGE TypeOperators #-}
