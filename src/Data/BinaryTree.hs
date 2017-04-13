@@ -3,8 +3,9 @@
 {-# LANGUAGE DeriveFunctor      #-}
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE DeriveTraversable  #-}
+{-# LANGUAGE Safe               #-}
 
--- | A simple, generic binary tree and some operations. Used is some of
+-- | A simple, generic binary tree and some operations. Used in some of
 -- the heaps.
 module Data.BinaryTree
   (Tree(..)
@@ -14,10 +15,11 @@ module Data.BinaryTree
   ,replicateTree
   ,replicateA
   ,treeFromList
-  ,zygoTree)
+  ,zygoTree
+  ,drawBinaryTree)
   where
 
-import           Control.DeepSeq      (NFData(..))
+import           Control.DeepSeq      (NFData (..))
 import           Data.Data            (Data)
 import           Data.Functor.Classes
 import           Data.Monoid
@@ -27,6 +29,8 @@ import           GHC.Generics         (Generic, Generic1)
 import           Data.Bifunctor
 import           Data.Bool
 import           Data.Function
+
+import qualified Data.Tree            as Rose
 
 -- | A simple binary tree for use in some of the heaps.
 data Tree a
@@ -39,7 +43,7 @@ data Tree a
 
 instance NFData a =>
          NFData (Tree a) where
-    rnf Leaf = ()
+    rnf Leaf         = ()
     rnf (Node x l r) = rnf x `seq` rnf l `seq` rnf r `seq` ()
 
 instance Eq1 Tree where
@@ -93,7 +97,8 @@ foldTree b f = go where
   go Leaf         = b
   go (Node x l r) = f x (go l) (go r)
 
--- | Check to see if this tree maintains the <https://en.wikipedia.org/wiki/Heap_(data_structure) heap property>.
+-- | Check to see if this tree maintains the
+-- <https://en.wikipedia.org/wiki/Heap_(data_structure) heap property>.
 isHeap :: Ord a => Tree a -> Bool
 isHeap =
     zygoTree
@@ -114,9 +119,10 @@ isHeap =
 -- this using explicit recursion:
 --
 -- @
--- isBalanced :: Tree a -> Bool
--- isBalanced Leaf = True
--- isBalanced (Node _ l r) = length l == length r && isBalanced l && isBalanced r
+-- isBalanced :: 'Tree' a -> Bool
+-- isBalanced 'Leaf' = True
+-- isBalanced ('Node' _ l r)
+--   = 'length' l == 'length' r && isBalanced l && isBalanced r
 -- @
 --
 -- However, this algorithm performs several extra passes over the
@@ -125,19 +131,20 @@ isHeap =
 -- @
 -- isBalanced :: Tree a -> Bool
 -- isBalanced = snd . go where
---   go Leaf = (0 :: Int,True)
---   go (Node _ l r) =
+--   go 'Leaf' = (0 :: Int,True)
+--   go ('Node' _ l r) =
 --       let (llen,lbal) = go l
 --           (rlen,rbal) = go r
 --       in (llen + rlen + 1, llen == rlen && lbal && rbal)
 -- @
 --
--- This same algorithm (in one pass) can be expressed as a zygomorphism:
+-- This same algorithm (the one pass version) can be expressed as a
+-- zygomorphism:
 --
 -- @
--- isBalanced :: Tree a -> Bool
+-- isBalanced :: 'Tree' a -> Bool
 -- isBalanced =
---     zygoTree
+--     'zygoTree'
 --         (0 :: Int)
 --         (\\_ x y -> 1 + x + y)
 --         True
@@ -145,7 +152,13 @@ isHeap =
 --   where
 --     go _ llen lbal rlen rbal = llen == rlen && lbal && rbal
 -- @
-zygoTree :: b1 -> (a -> b1 -> b1 -> b1) -> b -> (a -> b1 -> b -> b1 -> b -> b) -> Tree a -> b
+zygoTree
+    :: b1
+    -> (a -> b1 -> b1 -> b1)
+    -> b
+    -> (a -> b1 -> b -> b1 -> b -> b)
+    -> Tree a
+    -> b
 zygoTree b1 f1 b f = snd . go where
   go Leaf = (b1,b)
   go (Node x l r) =
@@ -160,10 +173,10 @@ unfoldTree f = go where
 
 -- | @'replicateTree' n a@ creates a tree of size @n@ filled @a@.
 --
--- >>> replicateTree 4 't'
--- Node 't' (Node 't' (Node 't' Leaf Leaf) Leaf) (Node 't' Leaf Leaf)
+-- >>> replicateTree 4 ()
+-- Node () (Node () (Node () Leaf Leaf) Leaf) (Node () Leaf Leaf)
 --
--- prop> n >= 0 ==> length (replicateTree n 'a') == n
+-- prop> n >= 0 ==> length (replicateTree n x) == n
 replicateTree :: Int -> a -> Tree a
 replicateTree n x = go n
   where
@@ -190,14 +203,19 @@ replicateA n x = go n
               (e,_) -> Node <$> x <*> go e <*> go (e - 1)
 
 instance Monoid (Tree a) where
-    mappend Leaf y = y
+    mappend Leaf y         = y
     mappend (Node x l r) y = Node x l (mappend r y)
     mempty = Leaf
 
 -- | Construct a tree from a list, putting each even-positioned
--- elements to the left.
+-- element to the left.
 treeFromList :: [a] -> Tree a
 treeFromList [] = Leaf
 treeFromList (x:xs) = uncurry (Node x `on` treeFromList) (pairs xs) where
   pairs ys = foldr f (const ([],[])) ys True
   f e a b = bool first second b (e:) (a (not b))
+
+-- | Pretty-print a tree.
+drawBinaryTree :: Show a => Tree a -> String
+drawBinaryTree = Rose.drawForest . foldTree [] f where
+  f x l r = [Rose.Node (show x) (l ++ r)]

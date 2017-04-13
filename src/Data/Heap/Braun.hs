@@ -19,10 +19,14 @@ import           Data.Data       (Data)
 import           Data.Typeable   (Typeable)
 import           GHC.Generics    (Generic, Generic1)
 
--- | A Braun heap. Based on <https://github.com/coq/coq/blob/d8a07b44f5245f8e2f3a47095c70bb3cc85e3d99/lib/heap.ml this implementation>.
+-- | A Braun heap. Based on
+-- <https://github.com/coq/coq/blob/d8a07b44f5245f8e2f3a47095c70bb3cc85e3d99/lib/heap.ml this implementation>.
 --
--- A braun tree is one where every left branch has at most one more element
--- than the right branch.
+-- A braun tree is a /nearly balanced/ binary tree: the left branch can
+-- be either exactly the same size as the right, or one element larger.
+--
+-- This version is unchecked (/very/ unchecked), and is provided mainly
+-- for comparison to the checked version.
 newtype Braun a = Braun
     { runBraun :: Tree a
     } deriving (Typeable,Generic,Data,Generic1,Functor,Foldable,Traversable)

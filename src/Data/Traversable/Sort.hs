@@ -7,11 +7,21 @@
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
-module Data.Traversable.Sort where
+-- | Sort any traversable. Idea from <https://github.com/treeowl/sort-traversable here>,
+-- but parameterized over the heap type.
+module Data.Traversable.Sort
+  (Sort(..)
+  ,liftSort
+  ,sortTraversable
+  ,runSort
+  ,sortTraversal)
+  where
 
 import           Data.Heap.Indexed.Class
 import           GHC.TypeLits
 
+-- | A heap with a certain number of elements, and a function which
+-- extracts exactly that many elements from a larger heap.
 data Sort f a r where
     Sort :: (forall n. f (m + n) a -> (f n a, r))
          -> !(f m a)
@@ -35,13 +45,17 @@ instance (MeldableIndexedQueue f x) => Applicative (Sort f x) where
                   (v'', a b)}}
   {-# INLINABLE (<*>) #-}
 
+-- | Lift a value into the running sort.
 liftSort :: (IndexedPriorityQueue f x) => x -> Sort f x x
 liftSort a = Sort (\h -> case minView h of (x, h') -> (h', x)) (singleton a)
 {-# INLINABLE liftSort #-}
 
+-- | Run the built-up function on the stored heap.
 runSort :: forall x a f. Sort f x a -> a
 runSort (Sort (f :: f (m + 0) x -> (f 0 x, a)) xs) = snd $ f xs
 
+-- | Sort an arbitrary traversable container using a heap. The first
+-- parameter is a phantom, specifying which heap to use.
 sortTraversable :: (MeldableIndexedQueue f a, Traversable t) => p f -> t a -> t a
 sortTraversable (_ :: p f) =
     runSort .
@@ -50,6 +64,7 @@ sortTraversable (_ :: p f) =
                      x -> Sort f x x)
 {-# INLINABLE sortTraversable #-}
 
+-- | Sort a traversal.
 sortTraversal
     :: (IndexedPriorityQueue f a)
     => ((a -> Sort f a a) -> t -> Sort f a t) -> t -> t

@@ -1,3 +1,5 @@
+-- | Functions for creating rose trees (from "Data.Tree") of a specified
+-- size.
 module Data.Tree.Replicate where
 
 import           Control.Monad
@@ -23,16 +25,16 @@ replicateA t x = go t
 
 -- | @'replicateTree' n a@ creates a tree of size @n@ filled with @a@.
 --
--- >>> putStr (drawTree (replicateTree 4 "a"))
--- a
+-- >>> putStr (drawTree (replicateTree 4 "."))
+-- .
 -- |
--- +- a
+-- +- .
 -- |
--- `- a
+-- `- .
 --    |
---    `- a
+--    `- .
 --
--- prop> n > 0 ==> length (replicateTree n 'a') == n
+-- prop> n > 0 ==> length (replicateTree n x) == n
 replicateTree :: Int -> a -> Tree a
 replicateTree t x = go t where
  go n | n <= 1 = Node x []

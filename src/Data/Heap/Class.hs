@@ -1,4 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 
 -- | Classes for the various heaps, mainly to avoid name clashing.
@@ -14,6 +15,9 @@ module Data.Heap.Class
 import           Data.List (unfoldr)
 import           Data.Function (on)
 import           Data.Coerce (Coercible,coerce)
+
+import           Data.Set (Set)
+import qualified Data.Set as Set
 
 -- | A class for priority queues. Conforming members can have their own
 -- definition of order on their contents. (i.e., 'Ord' is not required)
@@ -112,3 +116,27 @@ cmpQueue = compare `on` toList
 infixr 9 #.
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> a -> c
 (#.) _ = coerce
+
+instance Ord a => PriorityQueue Set a where
+    insert = Set.insert
+    empty = Set.empty
+    fromList = Set.fromList
+    singleton = Set.singleton
+    minView = Set.minView
+    toList = Set.toList
+
+instance Ord a => MeldableQueue Set a where
+    merge = Set.union
+
+instance PriorityQueue [] a where
+    insert = (:)
+    empty = []
+    fromList = id
+    singleton = (:[])
+    minView [] = Nothing
+    minView (x:xs) = Just (x,xs)
+    toList = id
+
+instance MeldableQueue [] a where
+    merge = (++)
+    fromFoldable = foldr (:) []

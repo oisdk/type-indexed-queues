@@ -1,11 +1,12 @@
-{-# LANGUAGE TypeInType    #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE TypeFamilies  #-}
-{-# LANGUAGE GADTs         #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE ScopedTypeVariables          #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeInType          #-}
+{-# LANGUAGE RankNTypes          #-}
+{-# LANGUAGE TypeFamilies        #-}
+{-# LANGUAGE GADTs               #-}
+{-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE FlexibleInstances   #-}
 
+-- | Provides singletons and general type-level utilities.
 module TypeLevel.Singletons
   (The(Truey, Falsy, Nily, (:-))
   ,KnownSing(..)
@@ -25,6 +26,10 @@ import Data.Type.Equality
 import Data.Coerce
 import Unsafe.Coerce
 
+-- | A data family for singletons. The cute name allows code like this:
+--
+-- @addZeroZero :: The Nat n -> x + 0 :~: x@
+--
 data family The k :: k -> *
 
 data instance The Bool x where
@@ -36,6 +41,7 @@ data instance The [k] xs where
     Nily :: The [k] '[]
     (:-) :: The k x -> The [k] xs -> The [k] (x ': xs)
 
+-- | Class for singletons which can be generated.
 class KnownSing (x :: k) where
     sing :: The k x
 
@@ -52,12 +58,24 @@ instance (KnownSing xs, KnownSing x) =>
          KnownSing (x ': xs) where
     sing = sing :- sing
 
+-- | This is just a newtype wrapper for 'Numeric.Natural.Natural'. As such, it
+-- is only valid if the programmer can't construct values where the
+-- type index doesn't match the contained value. For that reason,
+-- the constructor is not exported.
+--
+-- The reason for this setup is to allow properties and invariants to be proven
+-- about the numbers involved, while actual computation can  be carried out
+-- efficiently on the values at runtime.
+--
+-- See the implementation of "Data.Heap.Indexed.Leftist" for an example of
+-- the uses of this type.
 newtype instance The Lit.Nat n where
         NatSing :: Natural -> The Lit.Nat n
 
 instance Lit.KnownNat n => KnownSing n where
     sing = NatSing $ Prelude.fromInteger $ Lit.natVal (Proxy :: Proxy n)
 
+-- | Add two numbers, on both the value and type level.
 infixl 6 +.
 (+.) :: The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.+ m)
 (+.) =
@@ -65,6 +83,7 @@ infixl 6 +.
         (Prelude.+)
 {-# INLINE (+.) #-}
 
+-- | Multiply two numbers, on both the value and type level.
 infixl 7 *.
 (*.) :: The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.* m)
 (*.) =
@@ -72,6 +91,7 @@ infixl 7 *.
         (Prelude.*)
 {-# INLINE (*.) #-}
 
+-- | Raise a number to a power, on the type-level and value-level.
 infixr 8 ^.
 (^.) :: The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.^ m)
 (^.) =
@@ -79,6 +99,8 @@ infixr 8 ^.
         (Prelude.^)
 {-# INLINE (^.) #-}
 
+-- | Test order between two numbers, and provide a proof of that
+-- order with the result.
 infix 4 <=.
 (<=.) :: The Lit.Nat n -> The Lit.Nat m -> The Bool (n Lit.<=? m)
 (<=.) (NatSing x :: The Lit.Nat n) (NatSing y :: The Lit.Nat m)
@@ -88,6 +110,6 @@ infix 4 <=.
       Refl -> Falsy
 {-# INLINE (<=.) #-}
 
-totalOrder :: ((n Lit.<=? m) ~ 'False) => p n -> q m -> ((m Lit.<=? n) ~ 'True => b) -> b
-totalOrder (_ :: p n) (_ :: q m) = case unsafeCoerce Refl :: (m Lit.<=? n) :~: 'True of
-  Refl -> \x -> x
+-- | A proof of a total order on the naturals.
+totalOrder ::  p n -> q m -> (n Lit.<=? m) :~: 'False -> (m Lit.<=? n) :~: 'True
+totalOrder (_ :: p n) (_ :: q m) Refl = unsafeCoerce Refl :: (m Lit.<=? n) :~: 'True

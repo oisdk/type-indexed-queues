@@ -7,6 +7,7 @@
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
+-- | Type-indexed Braun heaps.
 module Data.Heap.Indexed.Braun
   (Braun(..)
   ,Offset(..))
@@ -18,11 +19,20 @@ import           GHC.TypeLits
 
 import           Data.Heap.Indexed.Class hiding (MeldableIndexedQueue (..))
 
+import           Control.DeepSeq (NFData (rnf))
+
+-- | A Braun heap. Somewhat based on
+-- <https://github.com/coq/coq/blob/d8a07b44f5245f8e2f3a47095c70bb3cc85e3d99/lib/heap.ml this implementation>,
+-- but with a different strategy for maintaining invariants.
+--
+-- A braun tree is one where every left branch has at most one more element
+-- than the right branch.
 data Braun n a where
         Leaf :: Braun 0 a
         Node ::
           !(Offset n m) -> a -> Braun n a -> Braun m a -> Braun (n + m + 1) a
 
+-- | The "singleton" for whether or not the left branch is larger than the right.
 data Offset n m where
         Even :: Offset n n
         Lean :: Offset (1 + n) n
@@ -94,3 +104,14 @@ mergeLean l@(Node lo lx (ll :: Braun n1 a) (lr :: Braun m a)) r@(Node _ ly _ _ :
     prf _ _ _ Refl = Refl
 mergeLean l Leaf = l
 
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+instance NFData (Offset n m) where
+    rnf Even = ()
+    rnf Lean = ()
+
+instance NFData a =>
+         NFData (Braun n a) where
+    rnf Leaf = ()
+    rnf (Node o x l r) = rnf o `seq` rnf x `seq` rnf l `seq` rnf r `seq` ()

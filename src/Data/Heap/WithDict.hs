@@ -18,6 +18,9 @@ import           Control.DeepSeq (NFData(rnf))
 import           Data.Data       (Data)
 import           Data.Typeable   (Typeable)
 
+-- | This stores the dictionary of methods for the
+-- priority queue of @f@, allowing the entire type
+-- to conform to 'Foldable'.
 data WithDict f a where
     WithDict :: PriorityQueue f a => f a -> WithDict f a
 

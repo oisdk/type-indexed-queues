@@ -7,9 +7,16 @@
 {-# LANGUAGE TypeOperators         #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE StandaloneDeriving    #-}
+{-# LANGUAGE DeriveDataTypeable    #-}
+{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DeriveFoldable        #-}
+{-# LANGUAGE DeriveFunctor         #-}
+{-# LANGUAGE DeriveTraversable     #-}
 
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
+-- | Size-indexed binomial heaps.
 module Data.Heap.Indexed.Binomial
   (Tree(..)
   ,Node(..)
@@ -20,8 +27,14 @@ import           GHC.TypeLits
 
 import           Data.Heap.Indexed.Class
 
+import           Data.Typeable (Typeable)
+import           GHC.Generics (Generic, Generic1)
+import           Control.DeepSeq (NFData(rnf))
+
+-- | A size-indexed binomial tree.
 data Tree n a = Root a (Node n a)
 
+-- | A binomial tree, indexed by its size.
 data Node :: Nat -> * -> * where
         NilN :: Node 0 a
         (:<) :: {-# UNPACK #-} !(Tree n a)
@@ -35,6 +48,16 @@ mergeTree xr@(Root x xs) yr@(Root y ys)
 {-# INLINE mergeTree #-}
 
 infixr 5 :-
+-- | A size-indexed binomial heap.
+--
+-- The implementation is similar to:
+--
+-- * <http://www.cs.ox.ac.uk/ralf.hinze/publications/#J1 Hinze, Ralf. “Functional Pearls: Explaining Binomial Heaps.” Journal of Functional Programming 9, no. 1 (January 1999): 93–104. doi:10.1017/S0956796899003317.>
+-- * <https://themonadreader.files.wordpress.com/2010/05/issue16.pdf Wasserman, Louis. “Playing with Priority Queues.” The Monad.Reader, May 12, 2010.>
+--
+-- However invariants are more aggressively maintained, using a
+-- typechecker plugin. It is a list of binomial trees, equivalent to a
+-- binary number (stored least-significant-bit first).
 data Binomial :: Nat -> Nat -> * -> * where
         Nil  :: Binomial n 0 a
         (:-) :: {-# UNPACK #-} !(Tree z a)
@@ -119,3 +142,35 @@ minViewZipMay (t@(Root x ts) :- f) = Min $ case minViewZipMay f of
   Min ex@(Zipper minKey _ _) | minKey < x -> pushLeft t ex
   _                          -> Zipper x ts (skip f)
 
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+
+instance NFData a => NFData (Binomial rk n a) where
+    rnf Nil = ()
+    rnf (Skip xs) = rnf xs `seq` ()
+    rnf (x :- xs) = rnf x `seq` rnf xs `seq` ()
+
+deriving instance Foldable (Binomial rk n)
+deriving instance Functor (Binomial rk n)
+deriving instance Traversable (Binomial rk n)
+deriving instance Typeable a => Typeable (Binomial n a)
+
+deriving instance Foldable (Tree rk)
+deriving instance Functor (Tree rk)
+deriving instance Traversable (Tree rk)
+deriving instance Generic (Tree n a)
+deriving instance Generic1 (Tree n)
+deriving instance Typeable a => Typeable (Tree n a)
+
+instance NFData a => NFData (Tree rk a) where
+    rnf (Root x xs) = rnf x `seq` rnf xs `seq` ()
+
+deriving instance Typeable a => Typeable (Node n a)
+deriving instance Foldable (Node rk)
+deriving instance Functor (Node rk)
+deriving instance Traversable (Node rk)
+
+instance NFData a => NFData (Node rk a) where
+    rnf NilN = ()
+    rnf (x :< xs) = rnf x `seq` rnf xs `seq` ()

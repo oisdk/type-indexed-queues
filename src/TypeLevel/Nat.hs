@@ -3,16 +3,20 @@
 {-# LANGUAGE GADTs         #-}
 {-# LANGUAGE TypeOperators #-}
 
+-- | Type-level Peano arithmetic.
 module TypeLevel.Nat where
 
 import TypeLevel.Singletons
 
+-- | Peano numbers.
 data Nat = Z | S Nat
 
+-- | Singleton for type-level Peano numbers.
 data instance The Nat n where
     Zy :: The Nat 'Z
     Sy :: The Nat n -> The Nat ('S n)
 
+-- | Add two type-level numbers.
 infixl 6 +
 type family (+) (n :: Nat) (m :: Nat) :: Nat where
     'Z + m = m

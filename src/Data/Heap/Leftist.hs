@@ -19,7 +19,9 @@ import           Data.Data       (Data)
 import           Data.Typeable   (Typeable)
 import           GHC.Generics    (Generic, Generic1)
 
--- | A simple, unchecked weight-biased leftist heap.
+
+-- | A simple, unchecked, weight-biased leftist heap. Based on
+-- implementation from <https://github.com/jstolarek/dep-typed-wbl-heaps-hs here>.
 data Leftist a
     = Leaf
     | Node {-# UNPACK #-} !Int
@@ -27,6 +29,8 @@ data Leftist a
            (Leftist a)
            (Leftist a)
     deriving (Functor,Foldable,Traversable,Data,Typeable,Generic,Generic1)
+
+
 
 rank :: Leftist s -> Int
 rank Leaf           = 0
@@ -47,6 +51,9 @@ instance Ord a => PriorityQueue Leftist a where
 
     insert = merge . singleton
     {-# INLINE insert #-}
+
+
+
 
 instance Ord a =>
          MeldableQueue Leftist a where
@@ -71,6 +78,7 @@ instance Ord a => Monoid (Leftist a) where
     mempty = empty
     mappend = merge
 
+-- | A zygomorphism over the heap. Useful for checking shape properties.
 zygoLeftist
     :: b1
     -> (Int -> a -> b1 -> b1 -> b1)

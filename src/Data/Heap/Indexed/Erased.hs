@@ -5,7 +5,10 @@
 {-# LANGUAGE MultiParamTypeClasses     #-}
 {-# LANGUAGE FlexibleInstances         #-}
 
-module Data.Heap.Indexed.Erased where
+-- | Erase the size parameter on a size-indexed heap, using existentials.
+module Data.Heap.Indexed.Erased
+  (ErasedSize(..))
+  where
 
 import           GHC.TypeLits
 
@@ -13,6 +16,9 @@ import           Data.Heap.Class
 import           Data.Heap.Indexed.Class (IndexedPriorityQueue, MeldableIndexedQueue)
 import qualified Data.Heap.Indexed.Class as Indexed
 
+-- | This type contains a size-indexed heap, however the size index is
+-- hidden. This allows it to act like a standard heap, while maintaining
+-- the proven invariants of the size-indexed version.
 data ErasedSize f a = forall (n :: Nat). ErasedSize
     { runErasedSize :: f n a
     }

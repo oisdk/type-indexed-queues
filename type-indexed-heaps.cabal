@@ -33,8 +33,9 @@ library
                      , TypeLevel.Nat
                      , Data.BinaryTree
                      , Data.Tree.Replicate
-  other-modules:       TypeLevel.Singletons
+                     , TypeLevel.Singletons
                      , TypeLevel.Nat.Proofs
+                     , TypeLevel.Bool
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise >= 0.5
                      , deepseq >= 1.4
