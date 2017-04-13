@@ -7,7 +7,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Data.Heap.Leftist
-  (Leftist(..))
+  (Leftist(..)
+  ,zygoLeftist)
   where
 
 import           Data.Heap.Class
@@ -25,7 +26,6 @@ data Leftist a
            (Leftist a)
     deriving (Functor,Foldable,Traversable,Data,Typeable,Generic,Generic1)
 
-
 rank :: Leftist s -> Int
 rank Leaf          = 0
 rank (Node r _ _ _) = r
@@ -37,7 +37,7 @@ instance Ord a => PriorityQueue Leftist a where
     minView (Node _ x l r) = Just (x, merge l r)
     {-# INLINE minView #-}
 
-    singleton x = Node 0 x Leaf Leaf
+    singleton x = Node 1 x Leaf Leaf
     {-# INLINE singleton #-}
 
     empty = Leaf
@@ -62,6 +62,21 @@ join t1 x t2
 instance Ord a => Monoid (Leftist a) where
     mempty = empty
     mappend = merge
+
+zygoLeftist
+    :: b1
+    -> (Int -> a -> b1 -> b1 -> b1)
+    -> b
+    -> (Int -> a -> b1 -> b -> b1 -> b -> b)
+    -> Leftist a
+    -> b
+zygoLeftist b1 f1 b f = snd . go
+  where
+    go Leaf = (b1, b)
+    go (Node n x l r) =
+        let (lr1,lr) = go l
+            (rr1,rr) = go r
+        in (f1 n x lr1 rr1, f n x lr1 lr rr1 rr)
 
 
 --------------------------------------------------------------------------------

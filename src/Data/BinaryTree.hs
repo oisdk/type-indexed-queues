@@ -82,6 +82,19 @@ foldTree b f = go where
   go Leaf         = b
   go (Node x l r) = f x (go l) (go r)
 
+paraTree :: b -> (a -> Tree a -> b -> Tree a -> b -> b) -> Tree a -> b
+paraTree b f = go where
+  go Leaf = b
+  go (Node x l r) = f x l (go l) r (go r)
+
+zygoTree :: b1 -> (a -> b1 -> b1 -> b1) -> b -> (a -> b1 -> b -> b1 -> b -> b) -> Tree a -> b
+zygoTree b1 f1 b f = snd . go where
+  go Leaf = (b1,b)
+  go (Node x l r) =
+      let (lr1,lr) = go l
+          (rr1,rr) = go r
+      in (f1 x lr1 rr1, f x lr1 lr rr1 rr)
+
 -- | Unfold a tree from a seed.
 unfoldTree :: (b -> Maybe (a, b, b)) -> b -> Tree a
 unfoldTree f = go where

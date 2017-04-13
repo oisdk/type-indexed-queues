@@ -12,14 +12,11 @@ import           Test.Tasty
 import           Test.Tasty.QuickCheck
 
 import           Data.BinaryTree
-import qualified Data.Tree as Rose
-import qualified Data.Tree.Replicate as Rose
-
 
 import           Data.Heap.Binomial         hiding (Tree)
 import qualified Data.Heap.Binomial         as Binomial
 import           Data.Heap.Braun            (Braun (..))
-import           Data.Heap.Leftist          (Leftist)
+import           Data.Heap.Leftist          (Leftist,zygoLeftist)
 import           Data.Heap.Pairing          (Pairing)
 import           Data.Heap.Skew
 
@@ -59,6 +56,16 @@ properBinomial = go 1 where
 fromList' :: (PriorityQueue h Int) => [Int] -> h Int
 fromList' = fromList
 
+lengthAlg :: (Int, a -> Int -> Int -> Int)
+lengthAlg = (0, const (+))
+
+binaryTreeIsHeap :: Ord a => Tree a -> Bool
+binaryTreeIsHeap = zygoTree Nothing (\x _ _ -> Just x) True go where
+  go x lroot lproper rroot rproper = isAbove x lroot && isAbove x rroot && lproper && rproper
+
+isAbove :: (Ord a, Foldable f) => a -> f a -> Bool
+isAbove x = all (x<=)
+
 propHeapSort :: (PriorityQueue h Int) => Proxy h -> TestTree
 propHeapSort p =
     testProperty "sort" $
@@ -66,12 +73,11 @@ propHeapSort p =
          heapSort p (xs :: [Int]) === sort xs
 
 properBraun :: Ord a => Braun a -> Bool
-properBraun (Braun Leaf) = True
-properBraun (Braun (Node x l r)) =
-    length r <= length l &&
-    length l <= length r + 1 &&
-    all (x <=) l &&
-    all (x <=) r && properBraun (Braun l) && properBraun (Braun r)
+properBraun (Braun xs) = binaryTreeIsHeap xs && uncurry zygoTree lengthAlg True go xs where
+  go _ llen lproper rlen rproper =
+    rlen <= llen &&
+    llen <= rlen + 1 &&
+    lproper && rproper
 
 indexedSort :: IndexedPriorityQueue h Int => Proxy h -> TestTree
 indexedSort (_ :: Proxy h) =
@@ -81,11 +87,20 @@ indexedSort (_ :: Proxy h) =
               heapSort (Proxy :: Proxy (ErasedSize h)) (xs :: [Int]) ===
               sort xs)
 
+properLeftist :: Ord a => Leftist a -> Bool
+properLeftist = zygoLeftist
+        (Nothing, 0)
+        (\_ x (_,ls) (_,rs) ->
+              (Just x, succ (min ls rs)))
+        True
+        go
+  where
+    go i x (lval,ls) lproper (rval,rs) rproper =
+        isAbove x lval &&
+        isAbove x rval && lproper && rproper && i == succ (min ls rs)
+
 intTree :: Gen (Tree Int)
 intTree = sized (`replicateA` arbitrary)
-
-intRoseTree :: Gen (Rose.Tree Int)
-intRoseTree = sized (`Rose.replicateA` arbitrary)
 
 reflexiveEq :: (Eq a, Show a) => Gen a -> Property
 reflexiveEq xs = forAll xs (\x -> x === x)
@@ -219,6 +234,11 @@ functorLaws (_ :: p b) (_ :: q c) (xs :: Gen (f a)) =
 withGen :: Functor f => a -> f (a -> b) -> f b
 withGen = fmap . flip ($)
 
+proper :: Show a => (a -> Bool) -> Gen a -> TestTree
+proper p xs = testProperty "proper" $ do
+    x <- xs
+    pure $ counterexample (show x) (p x)
+
 main :: IO ()
 main = do
     doctest ["-isrc", "src"]
@@ -228,35 +248,50 @@ main = do
             [ let xs = fmap (fromList :: [Int] -> Binomial 'Z Int) arbitrary
               in testGroup
                      "Binomial"
-                     [ testProperty "proper" (properBinomial . fromList')
+                     [ proper properBinomial xs
                      , propHeapSort (Proxy :: Proxy (Binomial 'Z))
                      , readShow xs
                      , equalityProps xs
                      , ordProps xs
                      , monoidProps xs
                      , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int) xs]
-            ,let xs = fmap (fromList :: [Int] -> Braun Int) arbitrary
-             in testGroup
-                  "Braun"
-                  [ testProperty
-                        "proper"
-                        (properBraun . fromList :: [Int] -> Bool)
-                  , propHeapSort (Proxy :: Proxy Braun)
-                  , readShow xs
-                  , equalityProps xs
-                  , ordProps xs
-                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int) xs]
+            , let xs = fmap (fromList :: [Int] -> Braun Int) arbitrary
+              in testGroup
+                     "Braun"
+                     [ proper properBraun xs
+                     , propHeapSort (Proxy :: Proxy Braun)
+                     , readShow xs
+                     , equalityProps xs
+                     , ordProps xs
+                     , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int) xs]
             , testGroup "Leftist" $
               propHeapSort (Proxy :: Proxy Leftist) :
               withGen
                   (fmap (fromList' :: [Int] -> Leftist Int) arbitrary)
+                  [ proper properLeftist
+                  , readShow
+                  , equalityProps
+                  , ordProps
+                  , monoidProps
+                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
+            , testGroup "Pairing" $
+              propHeapSort (Proxy :: Proxy Pairing) :
+              withGen
+                  (fmap (fromList' :: [Int] -> Pairing Int) arbitrary)
                   [ readShow
                   , equalityProps
                   , ordProps
                   , monoidProps
                   , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
-            , testGroup "Pairing" [propHeapSort (Proxy :: Proxy Pairing)]
-            , testGroup "Skew" [propHeapSort (Proxy :: Proxy Skew)]
+            , testGroup "Skew" $
+              propHeapSort (Proxy :: Proxy Skew) :
+              withGen
+                  (fmap (fromList' :: [Int] -> Skew Int) arbitrary)
+                  [ readShow
+                  , equalityProps
+                  , ordProps
+                  , monoidProps
+                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
             , testGroup
                   "Indexed Braun"
                   [indexedSort (Proxy :: Proxy Indexed.Braun)]
@@ -282,22 +317,14 @@ main = do
                   , ordProps
                   , liftedOrd
                   , monoidProps
-                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
-            ,
-              -- , applicativeLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)
-              -- , monadLaws
-              --       (fmap
-              --            (treeFromList .)
-              --            (arbitrary :: Gen (Int -> [Int])))
-              --       (fmap
-              --            (treeFromList .)
-              --            (arbitrary :: Gen (Int -> [Int])))]
-              testGroup
-                  "Rose Tree" $
-              withGen
-                  intRoseTree
-                  [ readShow
-                  , equalityProps]]
+                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]] -- , applicativeLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)
+                                                                            -- , monadLaws
+                                                                            --       (fmap
+                                                                            --            (treeFromList .)
+                                                                            --            (arbitrary :: Gen (Int -> [Int])))
+                                                                            --       (fmap
+                                                                            --            (treeFromList .)
+                                                                            --            (arbitrary :: Gen (Int -> [Int])))]
 
 -- seqRightLaw
 --     :: (Applicative f, Eq (f b), Show (f b))
