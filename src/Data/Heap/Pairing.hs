@@ -6,6 +6,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+-- | Pairing heaps.
 module Data.Heap.Pairing
   (Pairing(..))
   where
@@ -17,6 +18,7 @@ import           Data.Data       (Data)
 import           Data.Typeable   (Typeable)
 import           GHC.Generics    (Generic, Generic1)
 
+-- | A simple, unchecked pairing heap.
 data Pairing a
     = E
     | T a [Pairing a]

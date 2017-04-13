@@ -6,6 +6,7 @@
 {-# LANGUAGE DeriveTraversable     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
+-- | Skew heaps.
 module Data.Heap.Skew
   (Skew(..))
   where
@@ -18,6 +19,7 @@ import           Data.Data       (Data)
 import           Data.Typeable   (Typeable)
 import           GHC.Generics    (Generic, Generic1)
 
+-- | A simple, unchecked skew heap.
 newtype Skew a = Skew
     { runSkew :: Tree a
     } deriving (Functor,Foldable,Traversable,Data,Typeable,Generic,Generic1)

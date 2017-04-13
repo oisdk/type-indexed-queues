@@ -31,7 +31,7 @@ instance Ord a => IndexedPriorityQueue Leftist a where
     minView (Node _ x l r) = (x, merge l r)
     {-# INLINE minView #-}
 
-    singleton x = Node 0 x Empty Empty
+    singleton x = Node 1 x Empty Empty
     {-# INLINE singleton #-}
 
     empty = Empty

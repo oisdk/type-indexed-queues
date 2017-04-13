@@ -1,6 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 
+-- | Classes for the various heaps, mainly to avoid name clashing.
 module Data.Heap.Class
   (PriorityQueue(..)
   ,MeldableQueue(..)
@@ -12,38 +13,64 @@ module Data.Heap.Class
 
 import           Data.List (unfoldr)
 import           Data.Function (on)
+import           Data.Coerce (Coercible,coerce)
 
+-- | A class for priority queues. Conforming members can have their own
+-- definition of order on their contents. (i.e., 'Ord' is not required)
 class PriorityQueue h a where
 
     {-# MINIMAL minView , insert , empty #-}
 
+    -- | Return the minimal element, and the remaining elements,
+    -- or 'Nothing' if the heap is empty.
     minView
         :: h a -> Maybe (a, h a)
 
+    -- | Insert an element into the queue.
     insert
         :: a -> h a -> h a
+
+    -- | The empty queue.
     empty
         :: h a
+
+    -- | A queue with one element.
     singleton
         :: a -> h a
     singleton = flip insert empty
 
+    -- | Return a list of the contents of the queue, in order, from
+    -- smallest to largest.
     toList :: h a -> [a]
     toList = unfoldr minView
 
+    -- | Create a heap from a list.
     fromList :: [a] -> h a
     fromList = foldr insert empty
 
+    -- | Perform heap sort on a list of items.
     heapSort :: p h -> [a] -> [a]
     heapSort (_ :: p h) = toList . (fromList :: [a] -> h a)
 
+-- | A class for meldable priority queues. Conforming members should
+-- form a monoid under 'merge' and 'empty'.
 class PriorityQueue h a => MeldableQueue h a where
 
     {-# MINIMAL merge #-}
+    -- | Merge two heaps. This operation is associative, and has the
+    -- identity of 'empty'.
+    --
+    -- @'merge' x ('merge' y z) = 'merge' ('merge' x y) z@
+    --
+    -- @'merge' x 'empty' = 'merge' 'empty' x = x@
     merge :: h a -> h a -> h a
 
+    -- | Create a heap from a 'Foldable' container. This operation is
+    -- provided to allow the use of 'foldMap', which may be
+    -- asymptotically more efficient. The default definition uses
+    -- 'foldMap'.
     fromFoldable :: (Foldable f) => f a -> h a
-    fromFoldable = runQueueWrapper . foldMap (QueueWrapper . singleton)
+    fromFoldable = runQueueWrapper #. foldMap (QueueWrapper #. singleton)
 
 newtype QueueWrapper h a = QueueWrapper
     { runQueueWrapper :: h a
@@ -52,12 +79,18 @@ newtype QueueWrapper h a = QueueWrapper
 instance MeldableQueue h a =>
          Monoid (QueueWrapper h a) where
     mempty = QueueWrapper empty
-    mappend (QueueWrapper xs) (QueueWrapper ys) = QueueWrapper (merge xs ys)
+    mappend =
+        (coerce :: (h a -> h a -> h a) -> QueueWrapper h a -> QueueWrapper h a -> QueueWrapper h a)
+            merge
+    {-# INLINE mempty #-}
+    {-# INLINE mappend #-}
 
+-- | A default definition for 'showsPrec'.
 showsPrecQueue :: (PriorityQueue h a, Show a) => Int -> h a -> ShowS
 showsPrecQueue d xs =
     showParen (d >= 11) (showString "fromList " . showList (toList xs))
 
+-- | A default definition for 'readsPrec'.
 readPrecQueue
   :: (Read a, PriorityQueue h a) => Int -> ReadS (h a)
 readPrecQueue d =
@@ -68,8 +101,14 @@ readPrecQueue d =
               | ("fromList",ys) <- lex xs
               , (x,zs) <- readList ys ])
 
+-- | A default definition of '=='.
 eqQueue :: (Eq a, PriorityQueue h a) => h a -> h a -> Bool
 eqQueue = (==) `on` toList
 
+-- | A default definition of 'compare'.
 cmpQueue :: (Ord a, PriorityQueue h a) => h a -> h a -> Ordering
 cmpQueue = compare `on` toList
+
+infixr 9 #.
+(#.) :: Coercible b c => (b -> c) -> (a -> b) -> a -> c
+(#.) _ = coerce

@@ -4,7 +4,18 @@
 {-# LANGUAGE DeriveGeneric      #-}
 {-# LANGUAGE DeriveTraversable  #-}
 
-module Data.BinaryTree where
+-- | A simple, generic binary tree and some operations. Used is some of
+-- the heaps.
+module Data.BinaryTree
+  (Tree(..)
+  ,foldTree
+  ,isHeap
+  ,unfoldTree
+  ,replicateTree
+  ,replicateA
+  ,treeFromList
+  ,zygoTree)
+  where
 
 import           Control.DeepSeq      (NFData(..))
 import           Data.Data            (Data)
@@ -82,11 +93,58 @@ foldTree b f = go where
   go Leaf         = b
   go (Node x l r) = f x (go l) (go r)
 
-paraTree :: b -> (a -> Tree a -> b -> Tree a -> b -> b) -> Tree a -> b
-paraTree b f = go where
-  go Leaf = b
-  go (Node x l r) = f x l (go l) r (go r)
+-- | Check to see if this tree maintains the <https://en.wikipedia.org/wiki/Heap_(data_structure) heap property>.
+isHeap :: Ord a => Tree a -> Bool
+isHeap =
+    zygoTree
+        Nothing
+        (\x _ _ ->
+              Just x)
+        True
+        go
+  where
+    go x lroot lproper rroot rproper =
+        isAbove x lroot && isAbove x rroot && lproper && rproper
+    isAbove x = all (>=x)
 
+-- | A zygomorphism over a tree. Used if you want perform two folds
+-- over a tree in one pass.
+--
+-- As an example, checking if a tree is balanced can be performed like
+-- this using explicit recursion:
+--
+-- @
+-- isBalanced :: Tree a -> Bool
+-- isBalanced Leaf = True
+-- isBalanced (Node _ l r) = length l == length r && isBalanced l && isBalanced r
+-- @
+--
+-- However, this algorithm performs several extra passes over the
+-- tree. A more efficient version is much harder to read, however:
+--
+-- @
+-- isBalanced :: Tree a -> Bool
+-- isBalanced = snd . go where
+--   go Leaf = (0 :: Int,True)
+--   go (Node _ l r) =
+--       let (llen,lbal) = go l
+--           (rlen,rbal) = go r
+--       in (llen + rlen + 1, llen == rlen && lbal && rbal)
+-- @
+--
+-- This same algorithm (in one pass) can be expressed as a zygomorphism:
+--
+-- @
+-- isBalanced :: Tree a -> Bool
+-- isBalanced =
+--     zygoTree
+--         (0 :: Int)
+--         (\\_ x y -> 1 + x + y)
+--         True
+--         go
+--   where
+--     go _ llen lbal rlen rbal = llen == rlen && lbal && rbal
+-- @
 zygoTree :: b1 -> (a -> b1 -> b1 -> b1) -> b -> (a -> b1 -> b -> b1 -> b -> b) -> Tree a -> b
 zygoTree b1 f1 b f = snd . go where
   go Leaf = (b1,b)
@@ -136,16 +194,10 @@ instance Monoid (Tree a) where
     mappend (Node x l r) y = Node x l (mappend r y)
     mempty = Leaf
 
+-- | Construct a tree from a list, putting each even-positioned
+-- elements to the left.
 treeFromList :: [a] -> Tree a
 treeFromList [] = Leaf
 treeFromList (x:xs) = uncurry (Node x `on` treeFromList) (pairs xs) where
   pairs ys = foldr f (const ([],[])) ys True
   f e a b = bool first second b (e:) (a (not b))
-
-treeFold :: (a -> a -> a) -> a -> [a] -> a
-treeFold _ b [] = b
-treeFold _ _ [x] = x
-treeFold f b (x:y:xs) = treeFold f b (f x y : pairfold xs)
-    where
-        pairfold (xx:yy:rest) = f xx yy : pairfold rest
-        pairfold l = l
