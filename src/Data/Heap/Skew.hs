@@ -1,4 +1,9 @@
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE DeriveDataTypeable    #-}
+{-# LANGUAGE DeriveFoldable        #-}
+{-# LANGUAGE DeriveFunctor         #-}
+{-# LANGUAGE DeriveGeneric         #-}
+{-# LANGUAGE DeriveTraversable     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Data.Heap.Skew
@@ -8,9 +13,14 @@ module Data.Heap.Skew
 import           Data.BinaryTree
 import           Data.Heap.Class
 
+import           Control.DeepSeq (NFData(rnf))
+import           Data.Data       (Data)
+import           Data.Typeable   (Typeable)
+import           GHC.Generics    (Generic, Generic1)
+
 newtype Skew a = Skew
     { runSkew :: Tree a
-    }
+    } deriving (Functor,Foldable,Traversable,Data,Typeable,Generic,Generic1)
 
 instance Ord a => Monoid (Skew a) where
     mempty = Skew Leaf
@@ -32,3 +42,22 @@ instance Ord a => PriorityQueue Skew a where
 
 instance Ord a => MeldableQueue Skew a where
     merge = mappend
+
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+instance NFData a =>
+         NFData (Skew a) where
+    rnf (Skew x) = rnf x `seq` ()
+
+instance Ord a => Eq (Skew a) where
+    (==) = eqQueue
+
+instance Ord a => Ord (Skew a) where
+    compare = cmpQueue
+
+instance (Show a, Ord a) => Show (Skew a) where
+    showsPrec = showsPrecQueue
+
+instance (Read a, Ord a) => Read (Skew a) where
+    readsPrec = readPrecQueue

@@ -3,6 +3,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE StandaloneDeriving    #-}
+{-# LANGUAGE DeriveDataTypeable    #-}
 
 module Data.Heap.WithDict
   (WithDict(..))
@@ -10,6 +12,10 @@ module Data.Heap.WithDict
 
 import           Data.Heap.Class
 import           Data.Proxy
+
+import           Control.DeepSeq (NFData(rnf))
+import           Data.Data       (Data)
+import           Data.Typeable   (Typeable)
 
 data WithDict f a where
     WithDict :: PriorityQueue f a => f a -> WithDict f a
@@ -36,3 +42,27 @@ instance Foldable (WithDict f) where
       go hs = case minView hs of
         Nothing     -> mempty
         Just (y,ys) -> f y `mappend` go ys
+
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+instance NFData (f a) => NFData (WithDict f a) where
+    rnf (WithDict x) = rnf x `seq` ()
+
+deriving instance
+         (Data a, Data (f a), Typeable f, PriorityQueue f a) => Data
+         (WithDict f a)
+deriving instance Typeable (WithDict f a)
+
+
+instance (Eq a, PriorityQueue f a) => Eq (WithDict f a) where
+    (==) = eqQueue
+
+instance (Ord a, PriorityQueue f a) => Ord (WithDict f a) where
+    compare = cmpQueue
+
+instance (Show a, PriorityQueue f a) => Show (WithDict f a) where
+    showsPrec = showsPrecQueue
+
+instance (Read a, PriorityQueue f a) => Read (WithDict f a) where
+    readsPrec = readPrecQueue

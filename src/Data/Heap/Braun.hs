@@ -27,9 +27,6 @@ newtype Braun a = Braun
     { runBraun :: Tree a
     } deriving (Typeable,Generic,Data,Generic1,Functor,Foldable,Traversable)
 
-instance NFData a => NFData (Braun a) where
-    rnf (Braun xs) = rnf xs `seq` ()
-
 insertTree :: Ord a => a -> Tree a -> Tree a
 insertTree x Leaf = Node x Leaf Leaf
 insertTree x (Node y l r)
@@ -69,6 +66,12 @@ isAbove x (Node y _ _) = x <= y
 minViewTree :: Ord a => Tree a -> Maybe (a, Tree a)
 minViewTree Leaf         = Nothing
 minViewTree (Node x l r) = Just (x, mergeTree l r)
+
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+instance NFData a => NFData (Braun a) where
+    rnf (Braun xs) = rnf xs `seq` ()
 
 instance Ord a => Eq (Braun a) where
     (==) = eqQueue
