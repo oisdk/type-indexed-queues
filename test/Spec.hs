@@ -93,14 +93,24 @@ symmetricEq xs =
     \x ->
          forAll xs $
          \y ->
-              (x == y) == (y == x)
+              let e = x == y
+              in collect e $ e == (y == x)
 
+{-# ANN equalityProps "HLint: ignore Use ==" #-}
 equalityProps :: (Eq a, Show a) => Gen a -> TestTree
 equalityProps xs =
     testGroup
         "equality"
         [ testProperty "reflexive" (reflexiveEq xs)
-        , testProperty "symmetric" (symmetricEq xs)]
+        , testProperty "symmetric" (symmetricEq xs)
+        , testProperty
+              "correct /="
+              (forAll xs $
+               \x ->
+                    forAll xs $
+                    \y ->
+                         let e = x == y
+                         in collect e $ e === not (x /= y))]
 
 readShow :: (Eq a, Read a, Show a) => Gen a -> TestTree
 readShow xs =
@@ -129,6 +139,54 @@ readShow1 (xs :: Gen (f a)) =
                     ((readsPrec n . show) x :: [(f a, String)])]
   where
     manualShow x = liftShowsPrec showsPrec showList 0 x ""
+
+liftedEq :: (Eq1 f, Show (f a), Eq a, Eq (f a)) => Gen (f a) -> TestTree
+liftedEq xs =
+    testProperty "eq1" $
+    forAll xs $
+    \x ->
+         forAll xs $
+         \y ->
+              let e = (x == y)
+              in collect e $ liftEq (==) x y == e
+
+{-# ANN ordProps "HLint: ignore Use ==" #-}
+ordProps :: (Ord a, Show a) => Gen a -> TestTree
+ordProps xs =
+    testGroup
+        "ordering"
+        [ testProperty "reflexive ord" $
+          forAll xs $
+          \x ->
+               compare x x === EQ
+        , testProperty "symmetric ord" $
+          forAll xs $
+          \x ->
+               forAll xs $
+               \y ->
+                    let c = compare x y
+                    in collect c $ c === inv (compare y x)
+        , testProperty "same as ==" $
+          forAll xs $
+          \x ->
+               forAll xs $
+               \y ->
+                    let c = compare x y
+                    in collect c $ (c == EQ) === (x == y)]
+  where
+    inv EQ = EQ
+    inv LT = GT
+    inv GT = LT
+
+liftedOrd :: (Ord1 f, Show (f a), Ord a, Ord (f a)) => Gen (f a) -> TestTree
+liftedOrd xs =
+    testProperty "compare1" $
+    forAll xs $
+    \x ->
+         forAll xs $
+         \y ->
+              let c = compare x y
+              in collect c $ c === liftCompare compare x y
 
 main :: IO ()
 main = do
@@ -172,10 +230,16 @@ main = do
                   "Binary Tree"
                   [ readShow intTree
                   , readShow1 intTree
-                  , equalityProps intTree ]
+                  , equalityProps intTree
+                  , liftedEq intTree
+                  , ordProps intTree
+                  , liftedOrd intTree ]
             , testGroup
                   "Rose Tree"
                   [ readShow intRoseTree
                   , readShow1 intRoseTree
-                  , equalityProps intRoseTree ]
+                  , equalityProps intRoseTree
+                  , liftedEq intTree
+                  , ordProps intTree
+                  , liftedOrd intTree ]
             ]
