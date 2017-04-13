@@ -59,6 +59,11 @@ join t1 x t2
   | otherwise = Node (rank t1 + 1) x t2 t1
 {-# INLINE join #-}
 
+instance Ord a => Monoid (Leftist a) where
+    mempty = empty
+    mappend = merge
+
+
 --------------------------------------------------------------------------------
 -- Instances
 --------------------------------------------------------------------------------
