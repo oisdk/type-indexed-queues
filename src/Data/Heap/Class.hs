@@ -3,10 +3,15 @@
 
 module Data.Heap.Class
   (PriorityQueue(..)
-  ,MeldableQueue(..))
+  ,MeldableQueue(..)
+  ,showsPrecQueue
+  ,readPrecQueue
+  ,eqQueue
+  ,cmpQueue)
   where
 
 import           Data.List (unfoldr)
+import           Data.Function (on)
 
 class PriorityQueue h a where
 
@@ -48,3 +53,23 @@ instance MeldableQueue h a =>
          Monoid (QueueWrapper h a) where
     mempty = QueueWrapper empty
     mappend (QueueWrapper xs) (QueueWrapper ys) = QueueWrapper (merge xs ys)
+
+showsPrecQueue :: (PriorityQueue h a, Show a) => Int -> h a -> ShowS
+showsPrecQueue d xs =
+    showParen (d >= 11) (showString "fromList " . showList (toList xs))
+
+readPrecQueue
+  :: (Read a, PriorityQueue h a) => Int -> ReadS (h a)
+readPrecQueue d =
+    readParen
+        (d > 10)
+        (\xs ->
+              [ (fromList x, zs)
+              | ("fromList",ys) <- lex xs
+              , (x,zs) <- readList ys ])
+
+eqQueue :: (Eq a, PriorityQueue h a) => h a -> h a -> Bool
+eqQueue = (==) `on` toList
+
+cmpQueue :: (Ord a, PriorityQueue h a) => h a -> h a -> Ordering
+cmpQueue = compare `on` toList
