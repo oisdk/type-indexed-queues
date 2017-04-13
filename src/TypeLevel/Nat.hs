@@ -6,7 +6,7 @@
 -- | Type-level Peano arithmetic.
 module TypeLevel.Nat where
 
-import TypeLevel.Singletons
+import TypeLevel.Singletons hiding (type (+),Nat)
 
 -- | Peano numbers.
 data Nat = Z | S Nat

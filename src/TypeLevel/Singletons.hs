@@ -17,7 +17,12 @@ module TypeLevel.Singletons
   ,(+.)
   ,(^.)
   ,(<=.)
-  ,totalOrder)
+  ,totalOrder
+  ,type (<=)
+  ,type (Lit.+)
+  ,type (Lit.*)
+  ,type (Lit.^)
+  ,Lit.Nat)
   where
 
 import Data.Kind
@@ -116,3 +121,6 @@ infix 4 <=.
 -- | A proof of a total order on the naturals.
 totalOrder ::  p n -> q m -> (n Lit.<=? m) :~: 'False -> (m Lit.<=? n) :~: 'True
 totalOrder (_ :: p n) (_ :: q m) Refl = unsafeCoerce Refl :: (m Lit.<=? n) :~: 'True
+
+-- | A proof that x is less than or equal to y.
+type x <= y = (x Lit.<=? y) :~: 'True

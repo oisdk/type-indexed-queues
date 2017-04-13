@@ -16,7 +16,6 @@ module Data.Heap.Indexed.Leftist
   where
 
 import           Data.Heap.Indexed.Class
-import           GHC.TypeLits
 
 import           Data.Type.Equality
 import           Prelude
@@ -44,7 +43,7 @@ data Leftist n a where
              -> a
              -> Leftist n a
              -> Leftist m a
-             -> !((m <=? n) :~: 'True)
+             -> !(m <= n)
              -> Leftist (n + m + 1) a
 
 rank :: Leftist n s -> The Nat n
