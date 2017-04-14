@@ -10,7 +10,11 @@
 
 -- | This module exists to showcase some uses for indexed non-priority
 -- queues.
-module Data.List.Indexed where
+module Data.List.Indexed
+  (List(..)
+  ,DiffList(..)
+  ,reverseTraversable)
+  where
 
 import           Data.Heap.Indexed.Class
 import           TypeLevel.Singletons hiding (The(..))

@@ -391,8 +391,6 @@ newtype DiffList n a
 DiffList :: (forall m. List m a -> List (n + m) a) -> DiffList n a
 [runDiffList] :: DiffList n a -> forall m. List m a -> List (n + m) a
 
--- | Performs merging in reverse order.
-
 -- | Efficiently reverse any traversable, safely and totally.
 reverseTraversable :: Traversable t => t a -> t a
 instance Data.Heap.Indexed.Class.IndexedQueue Data.List.Indexed.List a
