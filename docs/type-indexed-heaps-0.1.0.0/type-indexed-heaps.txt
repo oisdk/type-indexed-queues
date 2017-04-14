@@ -237,29 +237,29 @@ replicateTree :: Int -> a -> Tree a
 -- | Classes for common functions between the heaps.
 module Data.Heap.Indexed.Class
 
--- | A classed for indexed priority queues. Equivalent to
---   <a>PriorityQueue</a> except the queues are indexed by their sizes.
-class IndexedPriorityQueue h a where singleton = flip insert empty
+-- | A classed for indexed priority queues. Equivalent to <a>Queue</a>
+--   except the queues are indexed by their sizes.
+class IndexedQueue h a where singleton = flip insert empty
 
 -- | The empty queue
-empty :: IndexedPriorityQueue h a => h 0 a
+empty :: IndexedQueue h a => h 0 a
 
 -- | Return the minimal element, and the rest of the queue.
-minView :: IndexedPriorityQueue h a => h (1 + n) a -> (a, h n a)
+minView :: IndexedQueue h a => h (1 + n) a -> (a, h n a)
 
 -- | A queue with one element.
-singleton :: IndexedPriorityQueue h a => a -> h 1 a
+singleton :: IndexedQueue h a => a -> h 1 a
 
 -- | Add an element to the queue.
-insert :: IndexedPriorityQueue h a => a -> h n a -> h (1 + n) a
+insert :: IndexedQueue h a => a -> h n a -> h (1 + n) a
 
 -- | Pattern match on the queue, and provide a proof that it is/isn't empty
 --   to the caller.
-minViewMay :: IndexedPriorityQueue h a => h n a -> (n ~ 0 => b) -> (forall m. (1 + m) ~ n => a -> h m a -> b) -> b
+minViewMay :: IndexedQueue h a => h n a -> (n ~ 0 => b) -> (forall m. (1 + m) ~ n => a -> h m a -> b) -> b
 
 -- | Queues which can be merged. Conforming members should form a monoid
 --   under <a>merge</a> and <a>empty</a>.
-class IndexedPriorityQueue h a => MeldableIndexedQueue h a
+class IndexedQueue h a => MeldableIndexedQueue h a
 
 -- | Merge two heaps. This operation is associative, and has the identity
 --   of <a>empty</a>.
@@ -291,7 +291,7 @@ module Data.Heap.Indexed.Leftist
 data Leftist n a
 [Leaf] :: Leftist 0 a
 [Node] :: !(The Nat ((n + m) + 1)) -> a -> Leftist n a -> Leftist m a -> !(m <= n) -> Leftist ((n + m) + 1) a
-instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedPriorityQueue Data.Heap.Indexed.Leftist.Leftist a
+instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedQueue Data.Heap.Indexed.Leftist.Leftist a
 instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.MeldableIndexedQueue Data.Heap.Indexed.Leftist.Leftist a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Leftist.Leftist n a)
 
@@ -312,7 +312,7 @@ data Pairing n a
 data HVec n a
 [HNil] :: HVec 0 a
 [HCons] :: Pairing m a -> HVec n a -> HVec (m + n) a
-instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedPriorityQueue Data.Heap.Indexed.Pairing.Pairing a
+instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedQueue Data.Heap.Indexed.Pairing.Pairing a
 instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.MeldableIndexedQueue Data.Heap.Indexed.Pairing.Pairing a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Pairing.Pairing n a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Pairing.HVec n a)
@@ -325,7 +325,7 @@ module Data.Heap.Indexed.Skew
 data Skew n a
 [Empty] :: Skew 0 a
 [Node] :: a -> Skew n a -> Skew m a -> Skew ((1 + n) + m) a
-instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedPriorityQueue Data.Heap.Indexed.Skew.Skew a
+instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedQueue Data.Heap.Indexed.Skew.Skew a
 instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.MeldableIndexedQueue Data.Heap.Indexed.Skew.Skew a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Skew.Skew n a)
 
@@ -336,23 +336,25 @@ module Data.Traversable.Sort
 
 -- | A heap with a certain number of elements, and a function which
 --   extracts exactly that many elements from a larger heap.
-data Sort f a r
-[Sort] :: (forall n. f (m + n) a -> (f n a, r)) -> !(f m a) -> Sort f a r
+data Sort f a b r
+[Sort] :: (forall n. f (m + n) b -> (f n b, r)) -> !(f m a) -> Sort f a b r
 
 -- | Lift a value into the running sort.
-liftSort :: (IndexedPriorityQueue f x) => x -> Sort f x x
+liftSort :: (IndexedQueue f a, IndexedQueue f x) => x -> Sort f x a a
 
 -- | Sort an arbitrary traversable container using a heap. The first
 --   parameter is a phantom, specifying which heap to use.
 sortTraversable :: (MeldableIndexedQueue f a, Traversable t) => p f -> t a -> t a
 
 -- | Run the built-up function on the stored heap.
-runSort :: forall x a f. Sort f x a -> a
+runSort :: forall a b f. Sort f b b a -> a
 
 -- | Sort a traversal.
-sortTraversal :: (IndexedPriorityQueue f a) => ((a -> Sort f a a) -> t -> Sort f a t) -> t -> t
-instance GHC.Base.Functor (Data.Traversable.Sort.Sort f x)
-instance Data.Heap.Indexed.Class.MeldableIndexedQueue f x => GHC.Base.Applicative (Data.Traversable.Sort.Sort f x)
+sortTraversal :: (IndexedQueue f a) => ((a -> Sort f a a a) -> t -> Sort f a a t) -> t -> t
+runSortWith :: forall a b c f. (forall n. f n a -> f n b) -> Sort f a b c -> c
+transformTraversable :: (MeldableIndexedQueue f a, IndexedQueue f b, Traversable t) => (forall n. f n a -> f n b) -> t a -> t b
+instance GHC.Base.Functor (Data.Traversable.Sort.Sort f a b)
+instance (Data.Heap.Indexed.Class.IndexedQueue f x, Data.Heap.Indexed.Class.MeldableIndexedQueue f x) => GHC.Base.Applicative (Data.Traversable.Sort.Sort f x y)
 
 
 -- | Type-indexed Braun heaps.
@@ -372,7 +374,7 @@ data Braun n a
 data Offset n m
 [Even] :: Offset n n
 [Lean] :: Offset (1 + n) n
-instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedPriorityQueue Data.Heap.Indexed.Braun.Braun a
+instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedQueue Data.Heap.Indexed.Braun.Braun a
 instance Control.DeepSeq.NFData (Data.Heap.Indexed.Braun.Offset n m)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Braun.Braun n a)
 
@@ -419,7 +421,7 @@ instance GHC.Generics.Generic1 (Data.Heap.Indexed.Binomial.Tree n)
 instance Data.Foldable.Foldable (Data.Heap.Indexed.Binomial.Node rk)
 instance GHC.Base.Functor (Data.Heap.Indexed.Binomial.Node rk)
 instance Data.Traversable.Traversable (Data.Heap.Indexed.Binomial.Node rk)
-instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedPriorityQueue (Data.Heap.Indexed.Binomial.Binomial 0) a
+instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.IndexedQueue (Data.Heap.Indexed.Binomial.Binomial 0) a
 instance GHC.Classes.Ord a => Data.Heap.Indexed.Class.MeldableIndexedQueue (Data.Heap.Indexed.Binomial.Binomial 0) a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Binomial.Binomial rk n a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.Binomial.Tree rk a)
@@ -429,37 +431,37 @@ instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.B
 -- | Classes for the various heaps, mainly to avoid name clashing.
 module Data.Heap.Class
 
--- | A class for priority queues. Conforming members can have their own
---   definition of order on their contents. (i.e., <a>Ord</a> is not
---   required)
-class PriorityQueue h a where singleton = flip insert empty toList = unfoldr minView fromList = foldr insert empty heapSort (_ :: p h) = toList . (fromList :: [a] -> h a)
+-- | A class for queues. Conforming members can have their own definition
+--   of order on their contents. (i.e., <a>Ord</a> is not required)
+class Queue h a where singleton = flip insert empty toList = unfoldr minView fromList = foldr insert empty heapSort (_ :: p h) = toList . (fromList :: [a] -> h a)
 
--- | Return the minimal element, and the remaining elements, or
---   <a>Nothing</a> if the heap is empty.
-minView :: PriorityQueue h a => h a -> Maybe (a, h a)
+-- | Return the first element, and the remaining elements, or
+--   <a>Nothing</a> if the queue is empty. For most queues, this will be
+--   the minimal element
+minView :: Queue h a => h a -> Maybe (a, h a)
 
 -- | Insert an element into the queue.
-insert :: PriorityQueue h a => a -> h a -> h a
+insert :: Queue h a => a -> h a -> h a
 
 -- | The empty queue.
-empty :: PriorityQueue h a => h a
+empty :: Queue h a => h a
 
 -- | A queue with one element.
-singleton :: PriorityQueue h a => a -> h a
+singleton :: Queue h a => a -> h a
 
 -- | Return a list of the contents of the queue, in order, from smallest to
 --   largest.
-toList :: PriorityQueue h a => h a -> [a]
+toList :: Queue h a => h a -> [a]
 
 -- | Create a heap from a list.
-fromList :: PriorityQueue h a => [a] -> h a
+fromList :: Queue h a => [a] -> h a
 
 -- | Perform heap sort on a list of items.
-heapSort :: PriorityQueue h a => p h -> [a] -> [a]
+heapSort :: Queue h a => p h -> [a] -> [a]
 
--- | A class for meldable priority queues. Conforming members should form a
---   monoid under <a>merge</a> and <a>empty</a>.
-class PriorityQueue h a => MeldableQueue h a where fromFoldable = runQueueWrapper #. foldMap (QueueWrapper #. singleton)
+-- | A class for meldable queues. Conforming members should form a monoid
+--   under <a>merge</a> and <a>empty</a>.
+class Queue h a => MeldableQueue h a where fromFoldable = runQueueWrapper #. foldMap (QueueWrapper #. singleton)
 
 -- | Merge two heaps. This operation is associative, and has the identity
 --   of <a>empty</a>.
@@ -480,20 +482,20 @@ merge :: MeldableQueue h a => h a -> h a -> h a
 fromFoldable :: (MeldableQueue h a, Foldable f) => f a -> h a
 
 -- | A default definition for <a>showsPrec</a>.
-showsPrecQueue :: (PriorityQueue h a, Show a) => Int -> h a -> ShowS
+showsPrecQueue :: (Queue h a, Show a) => Int -> h a -> ShowS
 
 -- | A default definition for <a>readsPrec</a>.
-readPrecQueue :: (Read a, PriorityQueue h a) => Int -> ReadS (h a)
+readPrecQueue :: (Read a, Queue h a) => Int -> ReadS (h a)
 
 -- | A default definition of <a>==</a>.
-eqQueue :: (Eq a, PriorityQueue h a) => h a -> h a -> Bool
+eqQueue :: (Eq a, Queue h a) => h a -> h a -> Bool
 
 -- | A default definition of <a>compare</a>.
-cmpQueue :: (Ord a, PriorityQueue h a) => h a -> h a -> Ordering
+cmpQueue :: (Ord a, Queue h a) => h a -> h a -> Ordering
 instance Data.Heap.Class.MeldableQueue h a => GHC.Base.Monoid (Data.Heap.Class.QueueWrapper h a)
-instance GHC.Classes.Ord a => Data.Heap.Class.PriorityQueue Data.Set.Base.Set a
+instance GHC.Classes.Ord a => Data.Heap.Class.Queue Data.Set.Base.Set a
 instance GHC.Classes.Ord a => Data.Heap.Class.MeldableQueue Data.Set.Base.Set a
-instance Data.Heap.Class.PriorityQueue [] a
+instance Data.Heap.Class.Queue [] a
 instance Data.Heap.Class.MeldableQueue [] a
 
 
@@ -506,7 +508,7 @@ module Data.Heap.Indexed.Erased
 data ErasedSize f a
 ErasedSize :: f n a -> ErasedSize f a
 [runErasedSize] :: ErasedSize f a -> f n a
-instance Data.Heap.Indexed.Class.IndexedPriorityQueue h a => Data.Heap.Class.PriorityQueue (Data.Heap.Indexed.Erased.ErasedSize h) a
+instance Data.Heap.Indexed.Class.IndexedQueue h a => Data.Heap.Class.Queue (Data.Heap.Indexed.Erased.ErasedSize h) a
 instance Data.Heap.Indexed.Class.MeldableIndexedQueue h a => Data.Heap.Class.MeldableQueue (Data.Heap.Indexed.Erased.ErasedSize h) a
 
 
@@ -527,7 +529,7 @@ instance Data.Data.Data a => Data.Data.Data (Data.Heap.Leftist.Leftist a)
 instance Data.Traversable.Traversable Data.Heap.Leftist.Leftist
 instance Data.Foldable.Foldable Data.Heap.Leftist.Leftist
 instance GHC.Base.Functor Data.Heap.Leftist.Leftist
-instance GHC.Classes.Ord a => Data.Heap.Class.PriorityQueue Data.Heap.Leftist.Leftist a
+instance GHC.Classes.Ord a => Data.Heap.Class.Queue Data.Heap.Leftist.Leftist a
 instance GHC.Classes.Ord a => Data.Heap.Class.MeldableQueue Data.Heap.Leftist.Leftist a
 instance GHC.Classes.Ord a => GHC.Base.Monoid (Data.Heap.Leftist.Leftist a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Leftist.Leftist a)
@@ -551,7 +553,7 @@ instance Data.Traversable.Traversable Data.Heap.Pairing.Pairing
 instance Data.Foldable.Foldable Data.Heap.Pairing.Pairing
 instance GHC.Base.Functor Data.Heap.Pairing.Pairing
 instance GHC.Classes.Ord a => GHC.Base.Monoid (Data.Heap.Pairing.Pairing a)
-instance GHC.Classes.Ord a => Data.Heap.Class.PriorityQueue Data.Heap.Pairing.Pairing a
+instance GHC.Classes.Ord a => Data.Heap.Class.Queue Data.Heap.Pairing.Pairing a
 instance GHC.Classes.Ord a => Data.Heap.Class.MeldableQueue Data.Heap.Pairing.Pairing a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Pairing.Pairing a)
 instance GHC.Classes.Ord a => GHC.Classes.Eq (Data.Heap.Pairing.Pairing a)
@@ -567,16 +569,16 @@ module Data.Heap.WithDict
 -- | This stores the dictionary of methods for the priority queue of
 --   <tt>f</tt>, allowing the entire type to conform to <a>Foldable</a>.
 data WithDict f a
-[WithDict] :: PriorityQueue f a => f a -> WithDict f a
-instance (Data.Data.Data a, Data.Data.Data (f a), Data.Typeable.Internal.Typeable f, Data.Heap.Class.PriorityQueue f a) => Data.Data.Data (Data.Heap.WithDict.WithDict f a)
-instance Data.Heap.Class.PriorityQueue f a => Data.Heap.Class.PriorityQueue (Data.Heap.WithDict.WithDict f) a
+[WithDict] :: Queue f a => f a -> WithDict f a
+instance (Data.Data.Data a, Data.Data.Data (f a), Data.Typeable.Internal.Typeable f, Data.Heap.Class.Queue f a) => Data.Data.Data (Data.Heap.WithDict.WithDict f a)
+instance Data.Heap.Class.Queue f a => Data.Heap.Class.Queue (Data.Heap.WithDict.WithDict f) a
 instance Data.Heap.Class.MeldableQueue f a => Data.Heap.Class.MeldableQueue (Data.Heap.WithDict.WithDict f) a
 instance Data.Foldable.Foldable (Data.Heap.WithDict.WithDict f)
 instance Control.DeepSeq.NFData (f a) => Control.DeepSeq.NFData (Data.Heap.WithDict.WithDict f a)
-instance (GHC.Classes.Eq a, Data.Heap.Class.PriorityQueue f a) => GHC.Classes.Eq (Data.Heap.WithDict.WithDict f a)
-instance (GHC.Classes.Ord a, Data.Heap.Class.PriorityQueue f a) => GHC.Classes.Ord (Data.Heap.WithDict.WithDict f a)
-instance (GHC.Show.Show a, Data.Heap.Class.PriorityQueue f a) => GHC.Show.Show (Data.Heap.WithDict.WithDict f a)
-instance (GHC.Read.Read a, Data.Heap.Class.PriorityQueue f a) => GHC.Read.Read (Data.Heap.WithDict.WithDict f a)
+instance (GHC.Classes.Eq a, Data.Heap.Class.Queue f a) => GHC.Classes.Eq (Data.Heap.WithDict.WithDict f a)
+instance (GHC.Classes.Ord a, Data.Heap.Class.Queue f a) => GHC.Classes.Ord (Data.Heap.WithDict.WithDict f a)
+instance (GHC.Show.Show a, Data.Heap.Class.Queue f a) => GHC.Show.Show (Data.Heap.WithDict.WithDict f a)
+instance (GHC.Read.Read a, Data.Heap.Class.Queue f a) => GHC.Read.Read (Data.Heap.WithDict.WithDict f a)
 
 
 -- | Simple binomial heaps, with a statically-enforced shape.
@@ -631,7 +633,7 @@ instance Data.Foldable.Foldable (Data.Heap.Binomial.Node rk)
 instance GHC.Base.Functor (Data.Heap.Binomial.Node rk)
 instance Data.Traversable.Traversable (Data.Heap.Binomial.Node rk)
 instance GHC.Classes.Ord a => GHC.Base.Monoid (Data.Heap.Binomial.Binomial rk a)
-instance GHC.Classes.Ord a => Data.Heap.Class.PriorityQueue (Data.Heap.Binomial.Binomial 'TypeLevel.Nat.Z) a
+instance GHC.Classes.Ord a => Data.Heap.Class.Queue (Data.Heap.Binomial.Binomial 'TypeLevel.Nat.Z) a
 instance GHC.Classes.Ord a => Data.Heap.Class.MeldableQueue (Data.Heap.Binomial.Binomial 'TypeLevel.Nat.Z) a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Binomial.Binomial rk a)
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Binomial.Tree rk a)
@@ -763,7 +765,7 @@ instance GHC.Base.Functor Data.Heap.Braun.Braun
 instance GHC.Generics.Generic1 Data.Heap.Braun.Braun
 instance Data.Data.Data a => Data.Data.Data (Data.Heap.Braun.Braun a)
 instance GHC.Generics.Generic (Data.Heap.Braun.Braun a)
-instance GHC.Classes.Ord a => Data.Heap.Class.PriorityQueue Data.Heap.Braun.Braun a
+instance GHC.Classes.Ord a => Data.Heap.Class.Queue Data.Heap.Braun.Braun a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Braun.Braun a)
 instance GHC.Classes.Ord a => GHC.Classes.Eq (Data.Heap.Braun.Braun a)
 instance GHC.Classes.Ord a => GHC.Classes.Ord (Data.Heap.Braun.Braun a)
@@ -785,7 +787,7 @@ instance Data.Traversable.Traversable Data.Heap.Skew.Skew
 instance Data.Foldable.Foldable Data.Heap.Skew.Skew
 instance GHC.Base.Functor Data.Heap.Skew.Skew
 instance GHC.Classes.Ord a => GHC.Base.Monoid (Data.Heap.Skew.Skew a)
-instance GHC.Classes.Ord a => Data.Heap.Class.PriorityQueue Data.Heap.Skew.Skew a
+instance GHC.Classes.Ord a => Data.Heap.Class.Queue Data.Heap.Skew.Skew a
 instance GHC.Classes.Ord a => Data.Heap.Class.MeldableQueue Data.Heap.Skew.Skew a
 instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Skew.Skew a)
 instance GHC.Classes.Ord a => GHC.Classes.Eq (Data.Heap.Skew.Skew a)
