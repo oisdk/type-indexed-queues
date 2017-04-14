@@ -15,7 +15,7 @@ Both versions of each heap are provided for comparison: for
 instance, compare the standard leftist heap (in
 "Data.Heap.Leftist"):
 
-```.haskell
+```haskell
 data Leftist a
   = Leaf
   | Node !Int
