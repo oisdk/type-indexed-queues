@@ -102,7 +102,7 @@
 --   
 --   The main interesting use of these sturctures is total traversable
 --   sorting (<a>sort-traversable</a>). An implementation of this is
---   provided in <a>Data.Traversable.Sort</a>. I'm interested in finding
+--   provided in <a>Data.Traversable.Parts</a>. I'm interested in finding
 --   out other uses for these kinds of structures.
 @package type-indexed-heaps
 @version 0.1.0.0
@@ -332,29 +332,49 @@ instance Control.DeepSeq.NFData a => Control.DeepSeq.NFData (Data.Heap.Indexed.S
 
 -- | Sort any traversable. Idea from <a>here</a>, but parameterized over
 --   the heap type.
-module Data.Traversable.Sort
+--   
+--   Parts can be thought of as a safe version of <tt>unsafePartsOf</tt>
+--   from lens.
+module Data.Traversable.Parts
 
--- | A heap with a certain number of elements, and a function which
---   extracts exactly that many elements from a larger heap.
-data Sort f a b r
-[Sort] :: (forall n. f (m + n) b -> (f n b, r)) -> !(f m a) -> Sort f a b r
+-- | A queue with a certain number of elements, and a function which
+--   extracts exactly that many elements from a larger queue. You can
+--   transform the queue (i.e., reversing, etc.) before running the
+--   function, effectively transforming the contents of a traversable
+--   safely. If the underlying queue is a priority queue, then inserting
+--   elements will sort them as you go.
+data Parts f g a b r
+[Parts] :: (forall n. g (m + n) b -> (g n b, r)) -> !(f m a) -> Parts f g a b r
 
--- | Lift a value into the running sort.
-liftSort :: (IndexedQueue f a, IndexedQueue f x) => x -> Sort f x a a
+-- | Lift a value into the running queue.
+liftParts :: (IndexedQueue g a, IndexedQueue f x) => x -> Parts f g x a a
 
--- | Sort an arbitrary traversable container using a heap. The first
---   parameter is a phantom, specifying which heap to use.
-sortTraversable :: (MeldableIndexedQueue f a, Traversable t) => p f -> t a -> t a
+-- | Enqueue every element of a traversable into a queue, and then dequeue
+--   them back into the same traversable. This is useful if, for instance,
+--   the queue is a priority queue: then this function will perform a sort.
+--   If the queue is first-in last-out, this function will perform a
+--   reversal.
+queueTraversable :: (MeldableIndexedQueue f a, Traversable t) => p f -> t a -> t a
 
--- | Run the built-up function on the stored heap.
-runSort :: forall a b f. Sort f b b a -> a
+-- | Run the built-up function on the stored queue.
+runParts :: forall a b f. Parts f f b b a -> a
 
--- | Sort a traversal.
-sortTraversal :: (IndexedQueue f a) => ((a -> Sort f a a a) -> t -> Sort f a a t) -> t -> t
-runSortWith :: forall a b c f. (forall n. f n a -> f n b) -> Sort f a b c -> c
+-- | Queues a traversal.
+queueTraversal :: (IndexedQueue f b, IndexedQueue f a) => ((a -> Parts f f a b b) -> t -> Parts f f a a t) -> t -> t
+
+-- | Perform a length-preserving transformation on the stored queue, and
+--   run the built-up function on the transformed version.
+runPartsWith :: forall a b c f g. (forall n. f n a -> g n b) -> Parts f g a b c -> c
+
+-- | Perform an arbitrary length-preserving transformation on a lens-style
+--   traversal.
+transformTraversal :: (IndexedQueue g b, IndexedQueue f a) => (forall n. f n a -> g n b) -> ((a -> Parts f g a b b) -> t -> Parts f g a b t) -> t -> t
+
+-- | Apply a function which transforms a queue without changing its size to
+--   an arbitrary traversable.
 transformTraversable :: (MeldableIndexedQueue f a, IndexedQueue f b, Traversable t) => (forall n. f n a -> f n b) -> t a -> t b
-instance GHC.Base.Functor (Data.Traversable.Sort.Sort f a b)
-instance (Data.Heap.Indexed.Class.IndexedQueue f x, Data.Heap.Indexed.Class.MeldableIndexedQueue f x) => GHC.Base.Applicative (Data.Traversable.Sort.Sort f x y)
+instance GHC.Base.Functor (Data.Traversable.Parts.Parts f g a b)
+instance (Data.Heap.Indexed.Class.IndexedQueue f x, Data.Heap.Indexed.Class.MeldableIndexedQueue f x) => GHC.Base.Applicative (Data.Traversable.Parts.Parts f g x y)
 
 
 -- | Type-indexed Braun heaps.
