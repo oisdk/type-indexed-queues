@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TypeInType          #-}</span><span>
+</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE RankNTypes          #-}</span><span>
+</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies        #-}</span><span>
+</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE GADTs               #-}</span><span>
+</span><a name="line-5"></a><span class="hs-pragma">{-# LANGUAGE TypeOperators       #-}</span><span>
+</span><a name="line-6"></a><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables #-}</span><span>
+</span><a name="line-7"></a><span class="hs-pragma">{-# LANGUAGE FlexibleInstances   #-}</span><span>
+</span><a name="line-8"></a><span>
+</span><a name="line-9"></a><span class="hs-comment">-- | Provides singletons and general type-level utilities. singletons</span><span>
+</span><a name="line-10"></a><span class="hs-comment">-- are value-level representations of types.</span><span>
+</span><a name="line-11"></a><span class="hs-comment">--</span><span>
+</span><a name="line-12"></a><span class="hs-comment">-- &lt;http://cs.brynmawr.edu/~rae/papers/2012/singletons/paper.pdf Eisenberg, Richard A., and Stephanie Weirich. &#8220;Dependently Typed Programming with Singletons.&#8221; In Proceedings of the 2012 Haskell Symposium, 117&#8211;130. Haskell &#8217;12. New York, NY, USA: ACM, 2012. doi:10.1145/2364506.2364522.&gt;</span><span>
+</span><a name="line-13"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">TypeLevel</span><span class="hs-operator">.</span><span class="hs-identifier">Singletons</span><span>
+</span><a name="line-14"></a><span>  </span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#The"><span class="hs-identifier hs-type">The</span></a><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#Truey"><span class="hs-identifier hs-var">Truey</span></a><span class="hs-special">,</span><span> </span><a href="TypeLevel.Singletons.html#Falsy"><span class="hs-identifier hs-var">Falsy</span></a><span class="hs-special">,</span><span> </span><a href="TypeLevel.Singletons.html#Nily"><span class="hs-identifier hs-var">Nily</span></a><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#%3A-"><span class="hs-operator hs-var">:-</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-15"></a><span>  </span><span class="hs-special">,</span><a href="TypeLevel.Singletons.html#KnownSing"><span class="hs-identifier hs-type">KnownSing</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a name="line-16"></a><span>  </span><span class="hs-special">,</span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#%2A."><span class="hs-operator hs-var">*.</span></a><span class="hs-special">)</span><span>
+</span><a name="line-17"></a><span>  </span><span class="hs-special">,</span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#%2B."><span class="hs-operator hs-var">+.</span></a><span class="hs-special">)</span><span>
+</span><a name="line-18"></a><span>  </span><span class="hs-special">,</span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#%5E."><span class="hs-operator hs-var">^.</span></a><span class="hs-special">)</span><span>
+</span><a name="line-19"></a><span>  </span><span class="hs-special">,</span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#%3C%3D."><span class="hs-operator hs-var">&lt;=.</span></a><span class="hs-special">)</span><span>
+</span><a name="line-20"></a><span>  </span><span class="hs-special">,</span><a href="TypeLevel.Singletons.html#totalOrder"><span class="hs-identifier hs-var">totalOrder</span></a><span>
+</span><a name="line-21"></a><span>  </span><span class="hs-special">,</span><span class="hs-keyword">type</span><span> </span><span class="hs-special">(</span><a href="TypeLevel.Singletons.html#%3C%3D"><span class="hs-operator hs-type">&lt;=</span></a><span class="hs-special">)</span><span>
+</span><a name="line-22"></a><span>  </span><span class="hs-special">,</span><span class="hs-keyword">type</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Lit</span><span class="hs-operator hs-type">.+</span><span class="hs-special">)</span><span>
+</span><a name="line-23"></a><span>  </span><span class="hs-special">,</span><span class="hs-keyword">type</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Lit</span><span class="hs-operator hs-type">.*</span><span class="hs-special">)</span><span>
+</span><a name="line-24"></a><span>  </span><span class="hs-special">,</span><span class="hs-keyword">type</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Lit</span><span class="hs-operator hs-type">.^</span><span class="hs-special">)</span><span>
+</span><a name="line-25"></a><span>  </span><span class="hs-special">,</span><span class="hs-identifier hs-type">Lit</span><span class="hs-operator hs-type">.</span><span class="hs-identifier hs-type">Nat</span><span class="hs-special">)</span><span>
+</span><a name="line-26"></a><span>  </span><span class="hs-keyword">where</span><span>
+</span><a name="line-27"></a><span>
+</span><a name="line-28"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Kind</span><span>
+</span><a name="line-29"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Numeric</span><span class="hs-operator">.</span><span class="hs-identifier">Natural</span><span>
+</span><a name="line-30"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">GHC</span><span class="hs-operator">.</span><span class="hs-identifier">TypeLits</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Lit</span><span>
+</span><a name="line-31"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Proxy</span><span>
+</span><a name="line-32"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Type</span><span class="hs-operator">.</span><span class="hs-identifier">Equality</span><span>
+</span><a name="line-33"></a><span>
+</span><a name="line-34"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Coerce</span><span>
+</span><a name="line-35"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Unsafe</span><span class="hs-operator">.</span><span class="hs-identifier">Coerce</span><span>
+</span><a name="line-36"></a><span>
+</span><a name="line-37"></a><span class="hs-comment">-- | A data family for singletons. The cute name allows code like this:</span><span>
+</span><a name="line-38"></a><span class="hs-comment">--</span><span>
+</span><a name="line-39"></a><span class="hs-comment">-- @addZeroZero :: The Nat n -&gt; n + 0 :~: n@</span><span>
+</span><a name="line-40"></a><span class="hs-comment">--</span><span>
+</span><a name="line-41"></a><span class="hs-keyword">data</span><span> </span><span class="hs-keyword">family</span><span> </span><a name="The"><a href="TypeLevel.Singletons.html#The"><span class="hs-identifier">The</span></a></a><span> </span><a name="local-6989586621679054169"><a href="#local-6989586621679054169"><span class="hs-identifier">k</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><a href="#local-6989586621679054169"><span class="hs-identifier hs-type">k</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-operator hs-type">*</span><span>
+</span><a name="line-42"></a><span>
+</span><a name="line-43"></a><span class="hs-keyword">data</span><span> </span><span class="hs-keyword">instance</span><span> </span><a href="TypeLevel.Singletons.html#The"><span class="hs-identifier hs-type">The</span></a><span> </span><span class="hs-identifier hs-type">Bool</span><span> </span><a href="#local-6989586621679058750"><span class="hs-identifier hs-type">x</span></a><span> </span><span class="hs-keyword">where</span><span>
+</span><a name="line-44"></a><span>    </span><a name="Falsy"><a href="TypeLevel.Singletons.html#Falsy"><span class="hs-identifier">Falsy</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><a href="TypeLevel.Singletons.html#The"><span class="hs-identifier hs-type">The</span></a><span> </span><span class="hs-identifier hs-type">Bool</span><span> </span><span class="hs-char">'False
+    Truey :: The Bool 'True
+
+infixr 5 :-
+data instance The [k] xs where
+    Nily :: The [k] '[]
+    (:-) :: The k x -&gt; The [k] xs -&gt; The [k] (x ': xs)
+
+-- | Class for singletons which can be generated.
+class KnownSing (x :: k) where
+    sing :: The k x
+
+instance KnownSing 'True where
+    sing = Truey
+
+instance KnownSing 'False where
+    sing = Falsy
+
+instance KnownSing '[] where
+    sing = Nily
+
+instance (KnownSing xs, KnownSing x) =&gt;
+         KnownSing (x ': xs) where
+    sing = sing :- sing
+
+-- | This is just a newtype wrapper for 'Numeric.Natural.Natural'. As such, it
+-- is only valid if the programmer can't construct values where the
+-- type index doesn't match the contained value. For that reason,
+-- the constructor is not exported.
+--
+-- The reason for this setup is to allow properties and invariants to be proven
+-- about the numbers involved, while actual computation can  be carried out
+-- efficiently on the values at runtime.
+--
+-- See the implementation of &quot;Data.Heap.Indexed.Leftist&quot; for an example of
+-- the uses of this type.
+newtype instance The Lit.Nat n where
+        NatSing :: Natural -&gt; The Lit.Nat n
+
+instance Lit.KnownNat n =&gt; KnownSing n where
+    sing = NatSing $ Prelude.fromInteger $ Lit.natVal (Proxy :: Proxy n)
+
+-- | Add two numbers, on both the value and type level.
+infixl 6 +.
+(+.) :: The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Lit.Nat (n Lit.+ m)
+(+.) =
+    (coerce :: (Natural -&gt; Natural -&gt; Natural) -&gt; The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Lit.Nat (n Lit.+ m))
+        (Prelude.+)
+{-# INLINE (+.) #-}
+
+-- | Multiply two numbers, on both the value and type level.
+infixl 7 *.
+(*.) :: The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Lit.Nat (n Lit.* m)
+(*.) =
+    (coerce :: (Natural -&gt; Natural -&gt; Natural) -&gt; The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Lit.Nat (n Lit.* m))
+        (Prelude.*)
+{-# INLINE (*.) #-}
+
+-- | Raise a number to a power, on the type-level and value-level.
+infixr 8 ^.
+(^.) :: The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Lit.Nat (n Lit.^ m)
+(^.) =
+    (coerce :: (Natural -&gt; Natural -&gt; Natural) -&gt; The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Lit.Nat (n Lit.^ m))
+        (Prelude.^)
+{-# INLINE (^.) #-}
+
+-- | Test order between two numbers, and provide a proof of that
+-- order with the result.
+infix 4 &lt;=.
+(&lt;=.) :: The Lit.Nat n -&gt; The Lit.Nat m -&gt; The Bool (n Lit.&lt;=? m)
+(&lt;=.) (NatSing x :: The Lit.Nat n) (NatSing y :: The Lit.Nat m)
+  | x &lt;= y = case (unsafeCoerce (Refl :: 'True :~: 'True) :: (n Lit.&lt;=? m) :~: 'True) of
+      Refl -&gt; Truey
+  | otherwise = case (unsafeCoerce (Refl :: 'True :~: 'True) :: (n Lit.&lt;=? m) :~: 'False) of
+      Refl -&gt; Falsy
+{-# INLINE (&lt;=.) #-}
+
+-- | A proof of a total order on the naturals.
+totalOrder ::  p n -&gt; q m -&gt; (n Lit.&lt;=? m) :~: 'False -&gt; (m Lit.&lt;=? n) :~: 'True
+totalOrder (_ :: p n) (_ :: q m) Refl = unsafeCoerce Refl :: (m Lit.&lt;=? n) :~: 'True
+
+-- | A proof that x is less than or equal to y.
+type x &lt;= y = (x Lit.&lt;=? y) :~: 'True
+</span></pre></body></html>

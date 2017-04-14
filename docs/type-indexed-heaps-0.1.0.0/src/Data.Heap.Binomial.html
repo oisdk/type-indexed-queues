@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE BangPatterns          #-}</span><span>
+</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE DataKinds             #-}</span><span>
+</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE DeriveFoldable        #-}</span><span>
+</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE DeriveFunctor         #-}</span><span>
+</span><a name="line-5"></a><span class="hs-pragma">{-# LANGUAGE DeriveTraversable     #-}</span><span>
+</span><a name="line-6"></a><span class="hs-pragma">{-# LANGUAGE FlexibleInstances     #-}</span><span>
+</span><a name="line-7"></a><span class="hs-pragma">{-# LANGUAGE GADTs                 #-}</span><span>
+</span><a name="line-8"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><a name="line-9"></a><span class="hs-pragma">{-# LANGUAGE RankNTypes            #-}</span><span>
+</span><a name="line-10"></a><span class="hs-pragma">{-# LANGUAGE StandaloneDeriving    #-}</span><span>
+</span><a name="line-11"></a><span class="hs-pragma">{-# LANGUAGE DeriveDataTypeable    #-}</span><span>
+</span><a name="line-12"></a><span class="hs-pragma">{-# LANGUAGE DeriveGeneric         #-}</span><span>
+</span><a name="line-13"></a><span>
+</span><a name="line-14"></a><span class="hs-comment">-- | Simple binomial heaps, with a statically-enforced shape.</span><span>
+</span><a name="line-15"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Heap</span><span class="hs-operator">.</span><span class="hs-identifier">Binomial</span><span>
+</span><a name="line-16"></a><span>  </span><span class="hs-special">(</span><a href="Data.Heap.Binomial.html#Binomial"><span class="hs-identifier hs-type">Binomial</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a name="line-17"></a><span>  </span><span class="hs-special">,</span><a href="Data.Heap.Binomial.html#Node"><span class="hs-identifier hs-type">Node</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a name="line-18"></a><span>  </span><span class="hs-special">,</span><a href="Data.Heap.Binomial.html#Tree"><span class="hs-identifier hs-type">Tree</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-19"></a><span>  </span><span class="hs-keyword">where</span><span>
+</span><a name="line-20"></a><span>
+</span><a name="line-21"></a><span class="hs-keyword">import</span><span>           </span><a href="TypeLevel.Nat.html"><span class="hs-identifier">TypeLevel</span><span class="hs-operator">.</span><span class="hs-identifier">Nat</span></a><span>
+</span><a name="line-22"></a><span class="hs-keyword">import</span><span>           </span><a href="Data.Heap.Class.html"><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Heap</span><span class="hs-operator">.</span><span class="hs-identifier">Class</span></a><span>
+</span><a name="line-23"></a><span>
+</span><a name="line-24"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Typeable</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Typeable</span><span class="hs-special">)</span><span>
+</span><a name="line-25"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">GHC</span><span class="hs-operator">.</span><span class="hs-identifier">Generics</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Generic</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Generic1</span><span class="hs-special">)</span><span>
+</span><a name="line-26"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">DeepSeq</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">NFData</span><span class="hs-special">(</span><span class="hs-identifier hs-var">rnf</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a name="line-27"></a><span>
+</span><a name="line-28"></a><span class="hs-keyword">infixr</span><span> </span><span class="hs-number">5</span><span> </span><span class="hs-operator">:-</span><span>
+</span><a name="line-29"></a><span class="hs-comment">-- | A binomial heap, where the sizes of the nodes are enforced in the types.</span><span>
+</span><a name="line-30"></a><span class="hs-comment">--</span><span>
+</span><a name="line-31"></a><span class="hs-comment">-- The implementation is based on:</span><span>
+</span><a name="line-32"></a><span class="hs-comment">--</span><span>
+</span><a name="line-33"></a><span class="hs-comment">-- * &lt;http://www.cs.ox.ac.uk/ralf.hinze/publications/#J1 Hinze, Ralf. &#8220;Functional Pearls: Explaining Binomial Heaps.&#8221; Journal of Functional Programming 9, no. 1 (January 1999): 93&#8211;104. doi:10.1017/S0956796899003317.&gt;</span><span>
+</span><a name="line-34"></a><span class="hs-comment">-- * &lt;https://themonadreader.files.wordpress.com/2010/05/issue16.pdf Wasserman, Louis. &#8220;Playing with Priority Queues.&#8221; The Monad.Reader, May 12, 2010.&gt;</span><span>
+</span><a name="line-35"></a><span class="hs-comment">--</span><span>
+</span><a name="line-36"></a><span class="hs-comment">-- It is a list of binomial trees, equivalent to a binary number (stored</span><span>
+</span><a name="line-37"></a><span class="hs-comment">-- least-significant-bit first).</span><span>
+</span><a name="line-38"></a><span>
+</span><a name="line-39"></a><span class="hs-keyword">data</span><span> </span><a name="Binomial"><a href="Data.Heap.Binomial.html#Binomial"><span class="hs-identifier">Binomial</span></a></a><span> </span><a name="local-6989586621679098145"><a href="#local-6989586621679098145"><span class="hs-identifier">rk</span></a></a><span> </span><a name="local-6989586621679098146"><a href="#local-6989586621679098146"><span class="hs-identifier">a</span></a></a><span>
+</span><a name="line-40"></a><span>    </span><span class="hs-comment">-- | The empty heap</span><span>
+</span><a name="line-41"></a><span>    </span><span class="hs-glyph">=</span><span> </span><a name="Nil"><a href="Data.Heap.Binomial.html#Nil"><span class="hs-identifier">Nil</span></a></a><span>
+</span><a name="line-42"></a><span>    </span><span class="hs-comment">-- | Skip a child tree (equivalent to a zero in the binary representation</span><span>
+</span><a name="line-43"></a><span>    </span><span class="hs-comment">-- of the data structure).</span><span>
+</span><a name="line-44"></a><span>    </span><span class="hs-glyph">|</span><span> </span><a name="Skip"><a href="Data.Heap.Binomial.html#Skip"><span class="hs-identifier">Skip</span></a></a><span> </span><span class="hs-special">(</span><a href="Data.Heap.Binomial.html#Binomial"><span class="hs-identifier hs-type">Binomial</span></a><span> </span><span class="hs-special">(</span><span class="hs-char">'S rk) a)
+    -- | A child tree. Equivalent to a one in the binary representation.
+    | (:-) {-# UNPACK #-} !(Tree rk a)
+           (Binomial ('S rk) a)
+
+-- | A rose tree, where the children are indexed.
+data Tree rk a = Root a (Node rk a)
+
+-- | A list of binomial trees, indexed by their sizes in ascending order.
+data Node n a where
+        NilN :: Node 'Z a
+        (:&lt;) :: {-# UNPACK #-} !(Tree n a) -&gt; Node n a -&gt; Node ('S n) a
+
+mergeTree :: Ord a =&gt; Tree rk a -&gt; Tree rk a -&gt; Tree ('S rk) a
+mergeTree xr@(Root x xs) yr@(Root y ys)
+  | x &lt;= y    = Root x (yr :&lt; xs)
+  | otherwise = Root y (xr :&lt; ys)
+
+instance Ord a =&gt;
+         Monoid (Binomial rk a) where
+    mappend Nil ys              = ys
+    mappend xs Nil              = xs
+    mappend (Skip xs) (Skip ys) = Skip (mappend xs ys)
+    mappend (Skip xs) (y :- ys) = y :- mappend xs ys
+    mappend (x :- xs) (Skip ys) = x :- mappend xs ys
+    mappend (x :- xs) (y :- ys) = Skip (mergeCarry (mergeTree x y) xs ys)
+    mempty = Nil
+
+mergeCarry
+    :: Ord a
+    =&gt; Tree rk a -&gt; Binomial rk a -&gt; Binomial rk a -&gt; Binomial rk a
+mergeCarry !t Nil ys              = carryLonger t ys
+mergeCarry !t xs Nil              = carryLonger t xs
+mergeCarry !t (Skip xs) (Skip ys) = t :- mappend xs ys
+mergeCarry !t (Skip xs) (y :- ys) = Skip (mergeCarry (mergeTree t y) xs ys)
+mergeCarry !t (x :- xs) (Skip ys) = Skip (mergeCarry (mergeTree t x) xs ys)
+mergeCarry !t (x :- xs) (y :- ys) = t :- mergeCarry (mergeTree x y) xs ys
+
+carryLonger :: Ord a =&gt; Tree rk a -&gt; Binomial rk a -&gt; Binomial rk a
+carryLonger !t Nil       = t :- Nil
+carryLonger !t (Skip xs) = t :- xs
+carryLonger !t (x :- xs) = Skip (carryLonger (mergeTree t x) xs)
+
+data Zipper a rk = Zipper (Node rk a) (Binomial rk a)
+
+data MinViewZipper a rk
+    = Infty
+    | Min !a {-# UNPACK #-} !(Zipper a rk)
+
+slideLeft :: Zipper a ('S rk) -&gt; Zipper a rk
+slideLeft (Zipper (t :&lt; ts) hs) = Zipper ts (t :- hs)
+
+pushLeft :: Ord a =&gt; Tree rk a -&gt; Zipper a ('S rk) -&gt; Zipper a rk
+pushLeft t (Zipper (x :&lt; xs) ts)
+  = Zipper xs (Skip (carryLonger (mergeTree t x) ts))
+
+minViewZip :: Ord a =&gt; Binomial rk a -&gt; MinViewZipper a rk
+minViewZip Nil = Infty
+minViewZip (Skip xs) = case minViewZip xs of
+  Infty   -&gt; Infty
+  Min e x -&gt; Min e (slideLeft x)
+minViewZip (t@(Root x ts) :- f) =
+    case minViewZip f of
+        Min minKey ex
+          | minKey &lt; x -&gt; Min minKey (pushLeft t ex)
+        _ -&gt; Min x (Zipper ts (Skip f))
+
+instance Ord a =&gt; PriorityQueue (Binomial 'Z) a where
+    minView hs =
+        case minViewZip hs of
+            Infty               -&gt; Nothing
+            Min x (Zipper _ ts) -&gt; Just (x, ts)
+    singleton x = Root x NilN :- Nil
+    insert x = carryLonger (Root x NilN)
+    empty = mempty
+    {-# INLINE empty #-}
+
+instance Ord a =&gt; MeldableQueue (Binomial 'Z) a where
+    merge = mappend
+    {-# INLINE merge #-}
+
+--------------------------------------------------------------------------------
+-- Instances
+--------------------------------------------------------------------------------
+
+instance NFData a =&gt; NFData (Binomial rk a) where
+    rnf Nil = ()
+    rnf (Skip xs) = rnf xs `seq` ()
+    rnf (x :- xs) = rnf x `seq` rnf xs `seq` ()
+
+deriving instance Foldable (Binomial rk)
+deriving instance Functor (Binomial rk)
+deriving instance Traversable (Binomial rk)
+deriving instance Generic (Binomial n a)
+deriving instance Generic1 (Binomial n)
+deriving instance Typeable a =&gt; Typeable (Binomial n a)
+
+deriving instance Foldable (Tree rk)
+deriving instance Functor (Tree rk)
+deriving instance Traversable (Tree rk)
+deriving instance Generic (Tree n a)
+deriving instance Generic1 (Tree n)
+deriving instance Typeable a =&gt; Typeable (Tree n a)
+
+instance NFData a =&gt; NFData (Tree rk a) where
+    rnf (Root x xs) = rnf x `seq` rnf xs `seq` ()
+
+deriving instance Typeable a =&gt; Typeable (Node n a)
+deriving instance Foldable (Node rk)
+deriving instance Functor (Node rk)
+deriving instance Traversable (Node rk)
+
+instance NFData a =&gt; NFData (Node rk a) where
+    rnf NilN = ()
+    rnf (x :&lt; xs) = rnf x `seq` rnf xs `seq` ()
+
+instance Ord a =&gt; Eq (Binomial 'Z a) where
+    (==) = eqQueue
+
+instance Ord a =&gt; Ord (Binomial 'Z a) where
+    compare = cmpQueue
+
+instance (Show a, Ord a) =&gt; Show (Binomial 'Z a) where
+    showsPrec = showsPrecQueue
+
+instance (Read a, Ord a) =&gt; Read (Binomial 'Z a) where
+    readsPrec = readPrecQueue
+</span></pre></body></html>

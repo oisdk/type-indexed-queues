@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>type-indexed-heaps-0.1.0.0: Heaps with verified and unverified versions.</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">type-indexed-heaps-0.1.0.0: Heaps with verified and unverified versions.</p></div><div id="content"><div id="description"><h1>type-indexed-heaps-0.1.0.0: Heaps with verified and unverified versions.</h1><div class="doc"><p>This library provides implementations of five different heaps
+(binomial, pairing, skew, leftist, and Braun), each in two
+flavours: one verified, and one not.</p><p>At the moment, only structural invariants are maintained.</p><h1>Comparisons of verified and unverified heaps</h1><p>Both versions of each heap are provided for comparison: for
+instance, compare the standard leftist heap (in
+<a href="Data-Heap-Leftist.html">Data.Heap.Leftist</a>):</p><pre>data Leftist a
+  = Leaf
+  | Node !Int
+        a
+        (Leftist a)
+        (Leftist a)</pre><p>To its size-indexed counterpart (in <a href="Data-Heap-Indexed-Leftist.html">Data.Heap.Indexed.Leftist</a>):</p><pre>data Leftist n a where
+        Leaf :: Leftist 0 a
+        Node :: !(The Nat (n + m + 1))
+             -&gt; a
+             -&gt; Leftist n a
+             -&gt; Leftist m a
+             -&gt; !(m &lt;= n)
+             -&gt; Leftist (n + m + 1) a</pre><p>The invariant here (that the size of the left heap must
+always be less than that of the right) is encoded in the
+proof <code>m <code>&lt;=</code> n</code>.</p><p>With that in mind, compare the unverified and verified
+implementatons of <code>merge</code>:</p><pre>merge Leaf h2 = h2
+merge h1 Leaf = h1
+merge h1@(Node w1 p1 l1 r1) h2@(Node w2 p2 l2 r2)
+  | p1 &lt; p2 =
+      if ll &lt;= lr
+          then Node (w1 + w2) p1 l1 (merge r1 h2)
+          else Node (w1 + w2) p1 (merge r1 h2) l1
+  | otherwise =
+      if rl &lt;= rr
+          then Node (w1 + w2) p2 l2 (merge r2 h1)
+          else Node (w1 + w2) p2 (merge r2 h1) l2
+  where
+    ll = rank r1 + w2
+    lr = rank l1
+    rl = rank r2 + w1
+    rr = rank l2</pre><p>Verified:</p><pre>merge Leaf h2 = h2
+merge h1 Leaf = h1
+merge h1@(Node w1 p1 l1 r1 _) h2@(Node w2 p2 l2 r2 _)
+  | p1 &lt; p2 =
+      if ll &lt;=. lr
+        then Node (w1 +. w2) p1 l1 (merge r1 h2)
+        else Node (w1 +. w2) p1 (merge r1 h2) l1 . totalOrder ll lr
+  | otherwise =
+      if rl &lt;=. rr
+          then Node (w1 +. w2) p2 l2 (merge r2 h1)
+          else Node (w1 +. w2) p2 (merge r2 h1) l2 . totalOrder rl rr
+  where
+    ll = rank r1 +. w2
+    lr = rank l1
+    rl = rank r2 +. w1
+    rr = rank l2</pre><h1>Using type families and typechecker plugins to encode the invariants</h1><p>The similarity is accomplished through overloading, and some
+handy functions. For instance, the second if-then-else works
+on boolean <em>singletons</em>, and the <code>&lt;=.</code> function provides a
+proof of order along with its answer. The actual arithmetic
+is carried out at runtime on normal integers, rather than
+Peano numerals. These tricks are explained in more detail
+<a href="TypeLevel-Singletons.html">TypeLevel.Singletons</a> and <a href="TypeLevel-Bool.html">TypeLevel.Bool</a>.</p><p>A typechecker plugin does most of the heavy lifting, although
+there are some (small) manual proofs.</p><h1>Uses of verified heaps</h1><p>The main interesting use of these sturctures is total traversable
+sorting (<a href="https://github.com/treeowl/sort-traversable">sort-traversable</a>).
+An implementation of this is provided in <a href="Data-Traversable-Sort.html">Data.Traversable.Sort</a>. I'm
+interested in finding out other uses for these kinds of structures.</p></div></div><div id="module-list"><p class="caption">Modules</p><ul><li><span id="control.n.1" class="module collapser" onclick="toggleSection('n.1')">Data</span><ul id="section.n.1" class="show"><li><span class="module"><a href="Data-BinaryTree.html">Data.BinaryTree</a></span></li><li><span id="control.n.1.2" class="module collapser" onclick="toggleSection('n.1.2')">Heap</span><ul id="section.n.1.2" class="show"><li><span class="module"><a href="Data-Heap-Binomial.html">Data.Heap.Binomial</a></span></li><li><span class="module"><a href="Data-Heap-Braun.html">Data.Heap.Braun</a></span></li><li><span class="module"><a href="Data-Heap-Class.html">Data.Heap.Class</a></span></li><li><span id="control.n.1.2.4" class="module collapser" onclick="toggleSection('n.1.2.4')">Indexed</span><ul id="section.n.1.2.4" class="show"><li><span class="module"><a href="Data-Heap-Indexed-Binomial.html">Data.Heap.Indexed.Binomial</a></span></li><li><span class="module"><a href="Data-Heap-Indexed-Braun.html">Data.Heap.Indexed.Braun</a></span></li><li><span class="module"><a href="Data-Heap-Indexed-Class.html">Data.Heap.Indexed.Class</a></span></li><li><span class="module"><a href="Data-Heap-Indexed-Erased.html">Data.Heap.Indexed.Erased</a></span></li><li><span class="module"><a href="Data-Heap-Indexed-Leftist.html">Data.Heap.Indexed.Leftist</a></span></li><li><span class="module"><a href="Data-Heap-Indexed-Pairing.html">Data.Heap.Indexed.Pairing</a></span></li><li><span class="module"><a href="Data-Heap-Indexed-Skew.html">Data.Heap.Indexed.Skew</a></span></li></ul></li><li><span class="module"><a href="Data-Heap-Leftist.html">Data.Heap.Leftist</a></span></li><li><span class="module"><a href="Data-Heap-Pairing.html">Data.Heap.Pairing</a></span></li><li><span class="module"><a href="Data-Heap-Skew.html">Data.Heap.Skew</a></span></li><li><span class="module"><a href="Data-Heap-WithDict.html">Data.Heap.WithDict</a></span></li></ul></li><li><span id="control.n.1.3" class="module collapser" onclick="toggleSection('n.1.3')">Traversable</span><ul id="section.n.1.3" class="show"><li><span class="module"><a href="Data-Traversable-Sort.html">Data.Traversable.Sort</a></span></li></ul></li><li><span id="control.n.1.4" class="module collapser" onclick="toggleSection('n.1.4')">Tree</span><ul id="section.n.1.4" class="show"><li><span class="module"><a href="Data-Tree-Replicate.html">Data.Tree.Replicate</a></span></li></ul></li></ul></li><li><span id="control.n.2" class="module collapser" onclick="toggleSection('n.2')">TypeLevel</span><ul id="section.n.2" class="show"><li><span class="module"><a href="TypeLevel-Bool.html">TypeLevel.Bool</a></span></li><li><span class="module"><span id="control.n.2.2" class="collapser" onclick="toggleSection('n.2.2')">&nbsp;</span><a href="TypeLevel-Nat.html">TypeLevel.Nat</a></span><ul id="section.n.2.2" class="show"><li><span class="module"><a href="TypeLevel-Nat-Proofs.html">TypeLevel.Nat.Proofs</a></span></li></ul></li><li><span class="module"><a href="TypeLevel-Singletons.html">TypeLevel.Singletons</a></span></li></ul></li></ul></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.17.3</p></div></body></html>
