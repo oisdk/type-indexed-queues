@@ -1,0 +1,32 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>StaticPtrTable</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_StaticPtrTable.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="src/StaticPtrTable.html">Source</a></li><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">ghc-8.0.2: The GHC API</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Safe Haskell</th><td>None</td></tr><tr><th>Language</th><td>Haskell2010</td></tr></table><p class="caption">StaticPtrTable</p></div><div id="description"><p class="caption">Description</p><div class="doc"><p>Code generation for the Static Pointer Table</p><p>(c) 2014 I/O Tweag</p><p>Each module that uses <code>static</code> keyword declares an initialization function of
+ the form hs_spt_init_<a href="module">module</a>() which is emitted into the _stub.c file and
+ annotated with <strong>attribute</strong>((constructor)) so that it gets executed at
+ startup time.</p><p>The function's purpose is to call hs_spt_insert to insert the static
+ pointers of this module in the hashtable of the RTS, and it looks something
+ like this:</p><pre>static void hs_hpc_init_Main(void) __attribute__((constructor));
+static void hs_hpc_init_Main(void) {
+
+  static StgWord64 k0[2] = {16252233372134256ULL,7370534374096082ULL};
+  extern StgPtr Main_sptEntryZC0_closure;
+  hs_spt_insert(k0, &amp;Main_sptEntryZC0_closure);
+
+  static StgWord64 k1[2] = {12545634534567898ULL,5409674567544151ULL};
+  extern StgPtr Main_sptEntryZC1_closure;
+  hs_spt_insert(k1, &amp;Main_sptEntryZC1_closure);
+
+}</pre><p>where the constants are fingerprints produced from the static forms.</p><p>There is also a finalization function for the time when the module is
+ unloaded.</p><pre>static void hs_hpc_fini_Main(void) __attribute__((destructor));
+static void hs_hpc_fini_Main(void) {
+
+  static StgWord64 k0[2] = {16252233372134256ULL,7370534374096082ULL};
+  hs_spt_remove(k0);
+
+  static StgWord64 k1[2] = {12545634534567898ULL,5409674567544151ULL};
+  hs_spt_remove(k1);
+
+}</pre></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><a href="#v:sptInitCode">sptInitCode</a> :: <a href="Module.html#t:Module">Module</a> -&gt; [(<a href="Fingerprint.html#t:Fingerprint">Fingerprint</a>, (<a href="Var.html#t:Id">Id</a>, <a href="CoreSyn.html#t:CoreExpr">CoreExpr</a>))] -&gt; <a href="Outputable.html#t:SDoc">SDoc</a></li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><a id="v:sptInitCode" class="def">sptInitCode</a> :: <a href="Module.html#t:Module">Module</a> -&gt; [(<a href="Fingerprint.html#t:Fingerprint">Fingerprint</a>, (<a href="Var.html#t:Id">Id</a>, <a href="CoreSyn.html#t:CoreExpr">CoreExpr</a>))] -&gt; <a href="Outputable.html#t:SDoc">SDoc</a> <a href="src/StaticPtrTable.html#sptInitCode" class="link">Source</a> <a href="#v:sptInitCode" class="selflink">#</a></p><div class="doc"><p><code>sptInitCode module statics</code> is a C stub to insert the static entries
+ <code>statics</code> of <code>module</code> into the static pointer table.</p><p>Each entry contains the fingerprint used to locate the entry and the
+ top-level binding for the entry.</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.17.3</p></div></body></html>
