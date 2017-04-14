@@ -66,7 +66,7 @@ lengthAlg = (0, const (+))
 isAbove :: (Ord a, Foldable f) => a -> f a -> Bool
 isAbove x = all (x<=)
 
-propHeapSort :: (PriorityQueue h Int) => Proxy h -> TestTree
+propHeapSort :: (Queue h Int) => Proxy h -> TestTree
 propHeapSort p =
     testProperty "sort" $
     \xs ->
@@ -79,7 +79,7 @@ braun (Braun xs) = isHeap xs && uncurry zygoTree lengthAlg True go xs where
     llen <= rlen + 1 &&
     lproper && rproper
 
-indexedSort :: IndexedPriorityQueue h Int => Proxy h -> TestTree
+indexedSort :: IndexedQueue h Int => Proxy h -> TestTree
 indexedSort (_ :: Proxy h) =
     testProperty
         "sort"

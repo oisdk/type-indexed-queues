@@ -108,7 +108,7 @@ minViewZip (t@(Root x ts) :- f) =
           | minKey < x -> Min minKey (pushLeft t ex)
         _ -> Min x (Zipper ts (Skip f))
 
-instance Ord a => PriorityQueue (Binomial 'Z) a where
+instance Ord a => Queue (Binomial 'Z) a where
     minView hs =
         case minViewZip hs of
             Infty               -> Nothing

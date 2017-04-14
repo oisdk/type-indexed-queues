@@ -22,7 +22,7 @@ data Skew n a where
         Empty :: Skew 0 a
         Node :: a -> Skew n a -> Skew m a -> Skew (1 + n + m) a
 
-instance Ord a => IndexedPriorityQueue Skew a where
+instance Ord a => IndexedQueue Skew a where
     empty = Empty
     singleton x = Node x Empty Empty
     minView (Node x l r) = (x, merge l r)

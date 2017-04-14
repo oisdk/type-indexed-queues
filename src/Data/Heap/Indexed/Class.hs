@@ -9,9 +9,9 @@ module Data.Heap.Indexed.Class where
 
 import           GHC.TypeLits
 
--- | A classed for indexed priority queues. Equivalent to 'Data.Heap.PriorityQueue'
+-- | A classed for indexed priority queues. Equivalent to 'Data.Heap.Queue'
 -- except the queues are indexed by their sizes.
-class IndexedPriorityQueue h a where
+class IndexedQueue h a where
 
     {-# MINIMAL insert, empty, minViewMay, minView #-}
 
@@ -42,7 +42,7 @@ class IndexedPriorityQueue h a where
 
 -- | Queues which can be merged. Conforming members should
 -- form a monoid under 'merge' and 'empty'.
-class IndexedPriorityQueue h a =>
+class IndexedQueue h a =>
       MeldableIndexedQueue h a where
     -- | Merge two heaps. This operation is associative, and has the
     -- identity of 'empty'.

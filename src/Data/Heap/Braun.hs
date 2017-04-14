@@ -37,7 +37,7 @@ insertTree x (Node y l r)
     | x <= y    = Node x (insertTree y r) l
     | otherwise = Node y (insertTree x r) l
 
-instance Ord a => PriorityQueue Braun a where
+instance Ord a => Queue Braun a where
     insert x (Braun ys) = Braun (insertTree x ys)
     empty = Braun Leaf
     minView (Braun xs) = (fmap.fmap) Braun (minViewTree xs)

@@ -66,7 +66,7 @@ data Binomial :: Nat -> Nat -> * -> * where
         Skip :: Binomial (1 + z) (1 + xs) a
              -> Binomial z (2 + xs + xs) a
 
-instance Ord a => IndexedPriorityQueue (Binomial 0) a where
+instance Ord a => IndexedQueue (Binomial 0) a where
     empty = Nil
     minView xs = case minViewZip xs of
       Zipper x _ ys -> (x, ys)

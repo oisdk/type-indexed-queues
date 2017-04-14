@@ -37,7 +37,7 @@ rank Leaf           = 0
 rank (Node r _ _ _) = r
 {-# INLINE rank #-}
 
-instance Ord a => PriorityQueue Leftist a where
+instance Ord a => Queue Leftist a where
 
     minView Leaf           = Nothing
     minView (Node _ x l r) = Just (x, merge l r)

@@ -4,7 +4,7 @@
 
 -- | Classes for the various heaps, mainly to avoid name clashing.
 module Data.Heap.Class
-  (PriorityQueue(..)
+  (Queue(..)
   ,MeldableQueue(..)
   ,showsPrecQueue
   ,readPrecQueue
@@ -19,14 +19,15 @@ import           Data.Coerce (Coercible,coerce)
 import           Data.Set (Set)
 import qualified Data.Set as Set
 
--- | A class for priority queues. Conforming members can have their own
+-- | A class for queues. Conforming members can have their own
 -- definition of order on their contents. (i.e., 'Ord' is not required)
-class PriorityQueue h a where
+class Queue h a where
 
     {-# MINIMAL minView , insert , empty #-}
 
-    -- | Return the minimal element, and the remaining elements,
-    -- or 'Nothing' if the heap is empty.
+    -- | Return the first element, and the remaining elements,
+    -- or 'Nothing' if the queue is empty. For most queues,
+    -- this will be the minimal element
     minView
         :: h a -> Maybe (a, h a)
 
@@ -56,9 +57,9 @@ class PriorityQueue h a where
     heapSort :: p h -> [a] -> [a]
     heapSort (_ :: p h) = toList . (fromList :: [a] -> h a)
 
--- | A class for meldable priority queues. Conforming members should
+-- | A class for meldable queues. Conforming members should
 -- form a monoid under 'merge' and 'empty'.
-class PriorityQueue h a => MeldableQueue h a where
+class Queue h a => MeldableQueue h a where
 
     {-# MINIMAL merge #-}
     -- | Merge two heaps. This operation is associative, and has the
@@ -90,13 +91,13 @@ instance MeldableQueue h a =>
     {-# INLINE mappend #-}
 
 -- | A default definition for 'showsPrec'.
-showsPrecQueue :: (PriorityQueue h a, Show a) => Int -> h a -> ShowS
+showsPrecQueue :: (Queue h a, Show a) => Int -> h a -> ShowS
 showsPrecQueue d xs =
     showParen (d >= 11) (showString "fromList " . showList (toList xs))
 
 -- | A default definition for 'readsPrec'.
 readPrecQueue
-  :: (Read a, PriorityQueue h a) => Int -> ReadS (h a)
+  :: (Read a, Queue h a) => Int -> ReadS (h a)
 readPrecQueue d =
     readParen
         (d > 10)
@@ -106,18 +107,18 @@ readPrecQueue d =
               , (x,zs) <- readList ys ])
 
 -- | A default definition of '=='.
-eqQueue :: (Eq a, PriorityQueue h a) => h a -> h a -> Bool
+eqQueue :: (Eq a, Queue h a) => h a -> h a -> Bool
 eqQueue = (==) `on` toList
 
 -- | A default definition of 'compare'.
-cmpQueue :: (Ord a, PriorityQueue h a) => h a -> h a -> Ordering
+cmpQueue :: (Ord a, Queue h a) => h a -> h a -> Ordering
 cmpQueue = compare `on` toList
 
 infixr 9 #.
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> a -> c
 (#.) _ = coerce
 
-instance Ord a => PriorityQueue Set a where
+instance Ord a => Queue Set a where
     insert = Set.insert
     empty = Set.empty
     fromList = Set.fromList
@@ -128,7 +129,7 @@ instance Ord a => PriorityQueue Set a where
 instance Ord a => MeldableQueue Set a where
     merge = Set.union
 
-instance PriorityQueue [] a where
+instance Queue [] a where
     insert = (:)
     empty = []
     fromList = id

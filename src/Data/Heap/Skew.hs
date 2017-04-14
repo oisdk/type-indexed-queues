@@ -35,7 +35,7 @@ smerge h1@(Node x lx rx) h2@(Node y ly ry)
   | x <= y    = Node x (smerge h2 rx) lx
   | otherwise = Node y (smerge h1 ry) ly
 
-instance Ord a => PriorityQueue Skew a where
+instance Ord a => Queue Skew a where
     singleton x = Skew (Node x Leaf Leaf)
     minView (Skew Leaf)         = Nothing
     minView (Skew (Node x l r)) = Just (x, Skew (smerge l r))

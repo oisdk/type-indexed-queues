@@ -34,7 +34,7 @@ data HVec n a where
   HNil :: HVec 0 a
   HCons :: Pairing m a -> HVec n a -> HVec (m + n) a
 
-instance Ord a => IndexedPriorityQueue Pairing a where
+instance Ord a => IndexedQueue Pairing a where
     minView (T x hs) = (x, mergePairs hs)
     {-# INLINABLE minView #-}
     singleton a = T a HNil

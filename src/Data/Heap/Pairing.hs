@@ -33,7 +33,7 @@ instance Ord a => Monoid (Pairing a) where
       | otherwise = T y (h1 : ys)
     {-# INLINABLE mappend #-}
 
-instance Ord a => PriorityQueue Pairing a where
+instance Ord a => Queue Pairing a where
     singleton a = T a []
     insert = mappend . singleton
     {-# INLINABLE insert #-}

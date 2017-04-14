@@ -13,7 +13,7 @@ module Data.Heap.Indexed.Erased
 import           GHC.TypeLits
 
 import           Data.Heap.Class
-import           Data.Heap.Indexed.Class (IndexedPriorityQueue, MeldableIndexedQueue)
+import           Data.Heap.Indexed.Class (IndexedQueue, MeldableIndexedQueue)
 import qualified Data.Heap.Indexed.Class as Indexed
 
 -- | This type contains a size-indexed heap, however the size index is
@@ -23,8 +23,8 @@ data ErasedSize f a = forall (n :: Nat). ErasedSize
     { runErasedSize :: f n a
     }
 
-instance IndexedPriorityQueue h a =>
-         PriorityQueue (ErasedSize h) a where
+instance IndexedQueue h a =>
+         Queue (ErasedSize h) a where
     insert x (ErasedSize xs) = ErasedSize (Indexed.insert x xs)
     empty = ErasedSize Indexed.empty
     minView (ErasedSize xs) =
@@ -37,7 +37,7 @@ instance IndexedPriorityQueue h a =>
       where
         go
             :: forall h n a.
-               (IndexedPriorityQueue h a)
+               (IndexedQueue h a)
             => h n a -> [a] -> ErasedSize h a
         go !h [] = ErasedSize h
         go !h (x:xs) = go (Indexed.insert x h) xs

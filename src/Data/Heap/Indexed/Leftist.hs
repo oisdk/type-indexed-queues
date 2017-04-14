@@ -51,7 +51,7 @@ rank Leaf             = sing
 rank (Node r _ _ _ _) = r
 {-# INLINE rank #-}
 
-instance Ord a => IndexedPriorityQueue Leftist a where
+instance Ord a => IndexedQueue Leftist a where
 
     minView (Node _ x l r _) = (x, merge l r)
     {-# INLINE minView #-}

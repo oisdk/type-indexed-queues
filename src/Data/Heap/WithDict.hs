@@ -22,9 +22,9 @@ import           Data.Typeable   (Typeable)
 -- priority queue of @f@, allowing the entire type
 -- to conform to 'Foldable'.
 data WithDict f a where
-    WithDict :: PriorityQueue f a => f a -> WithDict f a
+    WithDict :: Queue f a => f a -> WithDict f a
 
-instance PriorityQueue f a => PriorityQueue (WithDict f) a where
+instance Queue f a => Queue (WithDict f) a where
     minView (WithDict xs) = (fmap.fmap) WithDict (minView xs)
     insert x (WithDict xs) = WithDict (insert x xs)
     empty = WithDict empty
@@ -54,19 +54,19 @@ instance NFData (f a) => NFData (WithDict f a) where
     rnf (WithDict x) = rnf x `seq` ()
 
 deriving instance
-         (Data a, Data (f a), Typeable f, PriorityQueue f a) => Data
+         (Data a, Data (f a), Typeable f, Queue f a) => Data
          (WithDict f a)
 deriving instance Typeable (WithDict f a)
 
 
-instance (Eq a, PriorityQueue f a) => Eq (WithDict f a) where
+instance (Eq a, Queue f a) => Eq (WithDict f a) where
     (==) = eqQueue
 
-instance (Ord a, PriorityQueue f a) => Ord (WithDict f a) where
+instance (Ord a, Queue f a) => Ord (WithDict f a) where
     compare = cmpQueue
 
-instance (Show a, PriorityQueue f a) => Show (WithDict f a) where
+instance (Show a, Queue f a) => Show (WithDict f a) where
     showsPrec = showsPrecQueue
 
-instance (Read a, PriorityQueue f a) => Read (WithDict f a) where
+instance (Read a, Queue f a) => Read (WithDict f a) where
     readsPrec = readPrecQueue

@@ -37,7 +37,7 @@ data Offset n m where
         Even :: Offset n n
         Lean :: Offset (1 + n) n
 
-instance Ord a => IndexedPriorityQueue Braun a where
+instance Ord a => IndexedQueue Braun a where
 
   insert x Leaf = Node Even x Leaf Leaf
   insert x (Node o y l r)
