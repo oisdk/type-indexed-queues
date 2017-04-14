@@ -84,8 +84,8 @@ queueTraversable (_ :: p f) =
 -- | Apply a function which transforms a queue without changing its
 -- size to an arbitrary traversable.
 transformTraversable
-    :: (MeldableIndexedQueue f a, IndexedQueue f b, Traversable t)
-    => (forall n. f n a -> f n b) -> t a -> t b
+    :: (MeldableIndexedQueue f a, IndexedQueue g b, Traversable t)
+    => (forall n. f n a -> g n b) -> t a -> t b
 transformTraversable f = runPartsWith f . traverse liftParts
 
 -- | Perform an arbitrary length-preserving transformation

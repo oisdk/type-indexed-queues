@@ -120,6 +120,7 @@ library
                      , Data.Heap.Indexed.Class
                      , Data.Heap.Indexed.Erased
                      , Data.Traversable.Parts
+                     , Data.List.Indexed
                      , TypeLevel.Nat
                      , Data.BinaryTree
                      , Data.Tree.Replicate

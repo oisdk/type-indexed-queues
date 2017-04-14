@@ -372,9 +372,33 @@ transformTraversal :: (IndexedQueue g b, IndexedQueue f a) => (forall n. f n a -
 
 -- | Apply a function which transforms a queue without changing its size to
 --   an arbitrary traversable.
-transformTraversable :: (MeldableIndexedQueue f a, IndexedQueue f b, Traversable t) => (forall n. f n a -> f n b) -> t a -> t b
+transformTraversable :: (MeldableIndexedQueue f a, IndexedQueue g b, Traversable t) => (forall n. f n a -> g n b) -> t a -> t b
 instance GHC.Base.Functor (Data.Traversable.Parts.Parts f g a b)
 instance (Data.Heap.Indexed.Class.IndexedQueue f x, Data.Heap.Indexed.Class.MeldableIndexedQueue f x) => GHC.Base.Applicative (Data.Traversable.Parts.Parts f g x y)
+
+
+-- | This module exists to showcase some uses for indexed non-priority
+--   queues.
+module Data.List.Indexed
+
+-- | A simple length-indexed list.
+data List n a
+[Nil] :: List 0 a
+[:-] :: a -> List n a -> List (1 + n) a
+
+-- | A list with efficient concatenation.
+newtype DiffList n a
+DiffList :: (forall m. List m a -> List (n + m) a) -> DiffList n a
+[runDiffList] :: DiffList n a -> forall m. List m a -> List (n + m) a
+
+-- | Performs merging in reverse order.
+
+-- | Efficiently reverse any traversable, safely and totally.
+reverseTraversable :: Traversable t => t a -> t a
+instance Data.Heap.Indexed.Class.IndexedQueue Data.List.Indexed.List a
+instance Data.Heap.Indexed.Class.MeldableIndexedQueue Data.List.Indexed.List a
+instance Data.Heap.Indexed.Class.IndexedQueue Data.List.Indexed.DiffList a
+instance Data.Heap.Indexed.Class.MeldableIndexedQueue Data.List.Indexed.DiffList a
 
 
 -- | Type-indexed Braun heaps.
