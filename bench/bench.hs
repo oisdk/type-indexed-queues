@@ -3,7 +3,7 @@
 import           Criterion.Main
 import           System.Random
 
-import           Data.Traversable.Sort
+import           Data.Traversable.Parts
 import           Data.Heap.Class
 
 import qualified Data.Heap.Indexed.Binomial as Indexed
@@ -42,10 +42,10 @@ testSize n =
           \xs ->
                bgroup
                    "seq"
-                   [ bench "trav binom"       $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
-                   , bench "trav pairing"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
-                   , bench "trav skew"        $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
-                   , bench "trav leftist"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Leftist)) xs
+                   [ bench "trav binom"       $ nf (queueTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   , bench "trav pairing"     $ nf (queueTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav skew"        $ nf (queueTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "trav leftist"     $ nf (queueTraversable (Proxy :: Proxy Indexed.Leftist)) xs
                    , bench "Seq.sort"         $ nf Seq.sort xs
                    , bench "Seq.unstableSort" $ nf Seq.unstableSort xs
                    ]
@@ -53,10 +53,10 @@ testSize n =
           \xs ->
                bgroup
                    "tree"
-                   [ bench "trav binom"       $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
-                   , bench "trav pairing"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
-                   , bench "trav skew"        $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
-                   , bench "trav leftist"     $ nf (sortTraversable (Proxy :: Proxy Indexed.Leftist)) xs
+                   [ bench "trav binom"       $ nf (queueTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   , bench "trav pairing"     $ nf (queueTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav skew"        $ nf (queueTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "trav leftist"     $ nf (queueTraversable (Proxy :: Proxy Indexed.Leftist)) xs
                    ]
         , env (replicateM n randInt) $
           \xs ->
@@ -69,10 +69,10 @@ testSize n =
                    , bench "sort binom"   $ nf (heapSort (Proxy :: Proxy (Binomial 'Z))) xs
                    , bench "sort skew"    $ nf (heapSort (Proxy :: Proxy Skew)) xs
                    , bench "sort pqueue"  $ nf (P.toList . P.fromList) xs
-                   , bench "trav pairing" $ nf (sortTraversable (Proxy :: Proxy Indexed.Pairing)) xs
-                   , bench "trav leftist" $ nf (sortTraversable (Proxy :: Proxy Indexed.Leftist)) xs
-                   , bench "trav binom"   $ nf (sortTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
-                   , bench "trav skew"    $ nf (sortTraversable (Proxy :: Proxy Indexed.Skew)) xs
+                   , bench "trav pairing" $ nf (queueTraversable (Proxy :: Proxy Indexed.Pairing)) xs
+                   , bench "trav leftist" $ nf (queueTraversable (Proxy :: Proxy Indexed.Leftist)) xs
+                   , bench "trav binom"   $ nf (queueTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   , bench "trav skew"    $ nf (queueTraversable (Proxy :: Proxy Indexed.Skew)) xs
                    ]
         ]
 

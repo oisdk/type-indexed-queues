@@ -89,7 +89,7 @@ description:
   = Uses of verified heaps
   The main interesting use of these sturctures is total traversable
   sorting (<https://github.com/treeowl/sort-traversable sort-traversable>).
-  An implementation of this is provided in "Data.Traversable.Sort". I'm
+  An implementation of this is provided in "Data.Traversable.Parts". I'm
   interested in finding out other uses for these kinds of structures.
 
 homepage:            https://github.com/oisdk/type-indexed-heaps
@@ -119,7 +119,7 @@ library
                      , Data.Heap.Indexed.Braun
                      , Data.Heap.Indexed.Class
                      , Data.Heap.Indexed.Erased
-                     , Data.Traversable.Sort
+                     , Data.Traversable.Parts
                      , TypeLevel.Nat
                      , Data.BinaryTree
                      , Data.Tree.Replicate

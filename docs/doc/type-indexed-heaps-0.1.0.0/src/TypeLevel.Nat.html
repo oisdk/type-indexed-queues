@@ -1,0 +1,24 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css" /><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TypeFamilies  #-}</span><span>
+</span><a name="line-2"></a><span class="hs-pragma">{-# LANGUAGE DataKinds     #-}</span><span>
+</span><a name="line-3"></a><span class="hs-pragma">{-# LANGUAGE GADTs         #-}</span><span>
+</span><a name="line-4"></a><span class="hs-pragma">{-# LANGUAGE TypeOperators #-}</span><span>
+</span><a name="line-5"></a><span>
+</span><a name="line-6"></a><span class="hs-comment">-- | Type-level Peano arithmetic.</span><span>
+</span><a name="line-7"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">TypeLevel</span><span class="hs-operator">.</span><span class="hs-identifier">Nat</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a name="line-8"></a><span>
+</span><a name="line-9"></a><span class="hs-keyword">import</span><span> </span><a href="TypeLevel.Singletons.html"><span class="hs-identifier">TypeLevel</span><span class="hs-operator">.</span><span class="hs-identifier">Singletons</span></a><span> </span><span class="hs-keyword">hiding</span><span> </span><span class="hs-special">(</span><span class="hs-keyword">type</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-type">+</span><span class="hs-special">)</span><span class="hs-special">,</span><span class="hs-identifier hs-type">Nat</span><span class="hs-special">)</span><span>
+</span><a name="line-10"></a><span>
+</span><a name="line-11"></a><span class="hs-comment">-- | Peano numbers.</span><span>
+</span><a name="line-12"></a><span class="hs-keyword">data</span><span> </span><a name="Nat"><a href="TypeLevel.Nat.html#Nat"><span class="hs-identifier">Nat</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a name="Z"><a href="TypeLevel.Nat.html#Z"><span class="hs-identifier">Z</span></a></a><span> </span><span class="hs-glyph">|</span><span> </span><a name="S"><a href="TypeLevel.Nat.html#S"><span class="hs-identifier">S</span></a></a><span> </span><a href="TypeLevel.Nat.html#Nat"><span class="hs-identifier hs-type">Nat</span></a><span>
+</span><a name="line-13"></a><span>
+</span><a name="line-14"></a><span class="hs-comment">-- | Singleton for type-level Peano numbers.</span><span>
+</span><a name="line-15"></a><span class="hs-keyword">data</span><span> </span><span class="hs-keyword">instance</span><span> </span><a href="TypeLevel.Singletons.html#The"><span class="hs-identifier hs-type">The</span></a><span> </span><a href="TypeLevel.Nat.html#Nat"><span class="hs-identifier hs-type">Nat</span></a><span> </span><a href="#local-6989586621679066976"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-keyword">where</span><span>
+</span><a name="line-16"></a><span>    </span><a name="Zy"><a href="TypeLevel.Nat.html#Zy"><span class="hs-identifier">Zy</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><a href="TypeLevel.Singletons.html#The"><span class="hs-identifier hs-type">The</span></a><span> </span><a href="TypeLevel.Nat.html#Nat"><span class="hs-identifier hs-type">Nat</span></a><span> </span><span class="hs-char">'Z
+    Sy :: The Nat n -&gt; The Nat ('S n)
+
+-- | Add two type-level numbers.
+infixl 6 +
+type family (+) (n :: Nat) (m :: Nat) :: Nat where
+    'Z + m = m
+    'S n + m = 'S (n + m)
+</span></pre></body></html>
