@@ -392,7 +392,24 @@ DiffList :: (forall m. List m a -> List (n + m) a) -> DiffList n a
 [runDiffList] :: DiffList n a -> forall m. List m a -> List (n + m) a
 
 -- | Efficiently reverse any traversable, safely and totally.
+--   
+--   <pre>
+--   &gt;&gt;&gt; reverseTraversable [1,2,3]
+--   [3,2,1]
+--   </pre>
+--   
+--   <pre>
+--   reverseTraversable xs == reverse (xs :: [Int])
+--   </pre>
 reverseTraversable :: Traversable t => t a -> t a
+
+-- | Efficiently reverse any traversable, safely and totally.
+--   
+--   <pre>
+--   &gt;&gt;&gt; reverseTraversal (traverse.traverse) ('a',[1,2,3])
+--   ('a',[3,2,1])
+--   </pre>
+reverseTraversal :: ((a -> Parts DiffList List a a a) -> t -> Parts DiffList List a a t) -> t -> t
 instance Data.Heap.Indexed.Class.IndexedQueue Data.List.Indexed.List a
 instance Data.Heap.Indexed.Class.MeldableIndexedQueue Data.List.Indexed.List a
 instance Data.Heap.Indexed.Class.IndexedQueue Data.List.Indexed.DiffList a

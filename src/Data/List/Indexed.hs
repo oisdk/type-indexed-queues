@@ -13,7 +13,8 @@
 module Data.List.Indexed
   (List(..)
   ,DiffList(..)
-  ,reverseTraversable)
+  ,reverseTraversable
+  ,reverseTraversal)
   where
 
 import           Data.Heap.Indexed.Class
@@ -63,5 +64,20 @@ instance MeldableIndexedQueue DiffList a where
     merge (DiffList xs) (DiffList ys) = DiffList (ys . xs)
 
 -- | Efficiently reverse any traversable, safely and totally.
+--
+-- >>> reverseTraversable [1,2,3]
+-- [3,2,1]
+--
+-- prop> reverseTraversable xs == reverse (xs :: [Int])
 reverseTraversable :: Traversable t => t a -> t a
 reverseTraversable = transformTraversable (`runDiffList` Nil)
+
+-- | Efficiently reverse any traversable, safely and totally.
+--
+-- >>> reverseTraversal (traverse.traverse) ('a',[1,2,3])
+-- ('a',[3,2,1])
+reverseTraversal
+    :: ((a -> Parts DiffList List a a a) -> t -> Parts DiffList List a a t)
+    -> t
+    -> t
+reverseTraversal = transformTraversal (`runDiffList` Nil)
