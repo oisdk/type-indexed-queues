@@ -16,6 +16,7 @@ module TypeLevel.Singletons
   ,(*.)
   ,(+.)
   ,(^.)
+  ,(-.)
   ,(<=.)
   ,totalOrder
   ,type (<=)
@@ -105,6 +106,16 @@ infixr 8 ^.
     (coerce :: (Integer -> Integer -> Integer) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.^ m))
         (Prelude.^)
 {-# INLINE (^.) #-}
+
+-- | Subtract two numbers, on the type-level and value-level, with a
+-- proof that overflow can't occur.
+infixl 6 -.
+(-.) :: (m Lit.<= n) => The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.- m)
+(-.) =
+    (coerce :: (Integer -> Integer -> Integer) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.- m))
+        (Prelude.-)
+{-# INLINE (-.) #-}
+
 
 -- | Test order between two numbers, and provide a proof of that
 -- order with the result.
