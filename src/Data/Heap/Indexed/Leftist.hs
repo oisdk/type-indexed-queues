@@ -87,6 +87,7 @@ instance Ord a =>
         lr = rank l1
         rl = rank r2 +. w1
         rr = rank l2
+    {-# INLINE merge #-}
 
 instance NFData a =>
          NFData (Leftist n a) where

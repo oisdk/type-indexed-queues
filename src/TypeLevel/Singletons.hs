@@ -26,7 +26,6 @@ module TypeLevel.Singletons
   where
 
 import Data.Kind
-import Numeric.Natural
 import qualified GHC.TypeLits as Lit
 import Data.Proxy
 import Data.Type.Equality
@@ -66,7 +65,7 @@ instance (KnownSing xs, KnownSing x) =>
          KnownSing (x ': xs) where
     sing = sing :- sing
 
--- | This is just a newtype wrapper for 'Numeric.Natural.Natural'. As such, it
+-- | This is just a newtype wrapper for 'Integer'. As such, it
 -- is only valid if the programmer can't construct values where the
 -- type index doesn't match the contained value. For that reason,
 -- the constructor is not exported.
@@ -78,7 +77,7 @@ instance (KnownSing xs, KnownSing x) =>
 -- See the implementation of "Data.Heap.Indexed.Leftist" for an example of
 -- the uses of this type.
 newtype instance The Lit.Nat n where
-        NatSing :: Natural -> The Lit.Nat n
+        NatSing :: Integer -> The Lit.Nat n
 
 instance Lit.KnownNat n => KnownSing n where
     sing = NatSing $ Prelude.fromInteger $ Lit.natVal (Proxy :: Proxy n)
@@ -87,7 +86,7 @@ instance Lit.KnownNat n => KnownSing n where
 infixl 6 +.
 (+.) :: The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.+ m)
 (+.) =
-    (coerce :: (Natural -> Natural -> Natural) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.+ m))
+    (coerce :: (Integer -> Integer -> Integer) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.+ m))
         (Prelude.+)
 {-# INLINE (+.) #-}
 
@@ -95,7 +94,7 @@ infixl 6 +.
 infixl 7 *.
 (*.) :: The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.* m)
 (*.) =
-    (coerce :: (Natural -> Natural -> Natural) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.* m))
+    (coerce :: (Integer -> Integer -> Integer) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.* m))
         (Prelude.*)
 {-# INLINE (*.) #-}
 
@@ -103,7 +102,7 @@ infixl 7 *.
 infixr 8 ^.
 (^.) :: The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.^ m)
 (^.) =
-    (coerce :: (Natural -> Natural -> Natural) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.^ m))
+    (coerce :: (Integer -> Integer -> Integer) -> The Lit.Nat n -> The Lit.Nat m -> The Lit.Nat (n Lit.^ m))
         (Prelude.^)
 {-# INLINE (^.) #-}
 
