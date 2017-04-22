@@ -1,6 +1,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TypeFamilies  #-}
 {-# LANGUAGE DataKinds     #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 {-# OPTIONS_GHC -fno-warn-unticked-promoted-constructors #-}
 
@@ -25,7 +26,15 @@ plusZeroNeutral (Sy n) = case plusZeroNeutral n of
   Refl -> Refl
 {-# NOINLINE plusZeroNeutral #-}
 
+-- | Successor distributes over addition
+plusSuccDistrib :: The Nat n -> proxy m -> n + S m :~: S (n + m)
+plusSuccDistrib Zy _ = Refl
+plusSuccDistrib (Sy n) p = gcastWith (plusSuccDistrib n p) Refl
+{-# NOINLINE plusSuccDistrib #-}
+
+
 {-# RULES
 "plusAssoc" forall x y z. plusAssoc x y z = unsafeCoerce (Refl :: 'Z :~: 'Z)
 "plusZeroNeutral" forall x. plusZeroNeutral x = unsafeCoerce (Refl :: 'Z :~: 'Z)
+"plusSuccDistrib" forall x y. plusSuccDistrib x y = unsafeCoerce (Refl :: 'Z :~: 'Z)
  #-}
