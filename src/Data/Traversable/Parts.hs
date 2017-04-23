@@ -41,18 +41,19 @@ instance Functor (Parts f g a b) where
     Parts (\h' -> case g h' of (remn, r) -> (remn, f r)) h
   {-# INLINE fmap #-}
 
-instance (IndexedQueue f x, MeldableIndexedQueue f x) => Applicative (Parts f g x y) where
-  pure x = Parts (\h -> (h, x)) empty
-  {-# INLINE pure #-}
+instance (IndexedQueue f x, MeldableIndexedQueue f x) =>
+          Applicative (Parts f g x y) where
+    pure x = Parts (\h -> (h, x)) empty
+    {-# INLINE pure #-}
 
-  (Parts f (xs :: f m x) :: Parts f g x y (a -> b)) <*> Parts g (ys :: f n x) =
-    Parts h (merge xs ys)
-    where
-      h :: forall o . g ((m + n) + o) y -> (g o y, b)
-      h v = case f v of { (v', a) ->
-                case g v' of { (v'', b) ->
-                  (v'', a b)}}
-  {-# INLINABLE (<*>) #-}
+    (Parts f (xs :: f m x) :: Parts f g x y (a -> b)) <*> Parts g (ys :: f n x) =
+      Parts h (merge xs ys)
+      where
+        h :: forall o . g ((m + n) + o) y -> (g o y, b)
+        h v = case f v of { (v', a) ->
+                  case g v' of { (v'', b) ->
+                    (v'', a b)}}
+    {-# INLINABLE (<*>) #-}
 
 -- | Lift a value into the running queue.
 liftParts :: (IndexedQueue g a, IndexedQueue f x) => x -> Parts f g x a a
