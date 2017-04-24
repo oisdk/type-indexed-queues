@@ -1,7 +1,7 @@
 # type-indexed-queues
 ## Queues and Heaps with verified and unverified versions.
 
-[![Hackage](https://img.shields.io/hackage/v/lens.svg)](https://hackage.haskell.org/package/type-indexed-queues) [![Build Status](https://travis-ci.com/oisdk/type-indexed-heaps.svg?token=fXdGpZwjFQ87pr9zynKX&branch=master)](https://travis-ci.com/oisdk/type-indexed-heaps)
+[![Hackage](https://img.shields.io/hackage/v/lens.svg)](https://hackage.haskell.org/package/type-indexed-queues) [![Build Status](https://travis-ci.org/oisdk/type-indexed-queues.svg?branch=master)](https://travis-ci.org/oisdk/type-indexed-queues)
 
 
 
