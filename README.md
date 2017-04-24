@@ -3,13 +3,13 @@
 
 [![Hackage](https://img.shields.io/hackage/v/type-indexed-queues.svg)](https://hackage.haskell.org/package/type-indexed-queues) [![Build Status](https://travis-ci.org/oisdk/type-indexed-queues.svg?branch=master)](https://travis-ci.org/oisdk/type-indexed-queues)
 
-
-
 This library provides implementations of five different heaps
 (binomial, pairing, skew, leftist, and Braun), each in two
 flavours: one verified, and one not.
 
 At the moment, only structural invariants are maintained.
+
+More information, and a walkthrough of a couple implementations, can be found at this [blog post](http://doisinkidney.com/posts/2017-04-23-verifying-data-structures-in-haskell-lhs.html).
 
 ## Comparisons of verified and unverified heaps
 Both versions of each heap are provided for comparison: for
