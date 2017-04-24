@@ -97,7 +97,7 @@ license:             MIT
 license-file:        LICENSE
 author:              Donnacha Oisín Kidney
 maintainer:          mail@doisinkidney.com
-copyright:           2016 Donnacha Oisín Kidney
+copyright:           2017 Donnacha Oisín Kidney
 category:            Data Structures
 build-type:          Simple
 extra-source-files:  README.md
