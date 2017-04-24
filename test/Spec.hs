@@ -39,6 +39,7 @@ import           Data.Proxy
 
 import           Data.Functor.Classes
 
+
 binomial :: Ord a => Binomial 'Z a -> Bool
 binomial = go 1 where
   go :: forall z a. Ord a => Int -> Binomial z a -> Bool
