@@ -1,5 +1,5 @@
 name:                type-indexed-queues
-version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Queues with verified and unverified versions.
 description:
   This library provides implementations of five different queues
@@ -7,6 +7,9 @@ description:
   flavours: one verified, and one not.
   .
   At the moment, only structural invariants are maintained.
+  .
+  More information, and a walkthough of a couple implementations, can
+  be found at this <http://doisinkidney.com/posts/2017-04-23-verifying-data-structures-in-haskell-lhs.html blog post>.
   .
   = Comparisons of verified and unverified queues
   Both versions of each queue are provided for comparison: for
