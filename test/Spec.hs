@@ -39,6 +39,8 @@ import           Data.Proxy
 
 import           Data.Functor.Classes
 
+nat :: Gen Nat
+nat = fmap (fromInteger . getNonNegative) arbitrary
 
 binomial :: Ord a => Binomial 'Z a -> Bool
 binomial = go 1 where
@@ -166,19 +168,33 @@ ordProps xs =
           forAll xs $
           \x ->
                compare x x === EQ
-        , testProperty "symmetric ord" $ cmpProp (\x y -> inv (compare y x)) xs
-        , testProperty "same as ==" $ eqProp (\x y -> compare x y == EQ) xs]
+        , testProperty "symmetric ord" $ cmpProp (\x y c -> inv (compare y x) === c) xs
+        , testProperty "same as ==" $ eqProp (\x y -> (compare x y == EQ)) xs
+        , testProperty "same as < " $ cmpProp (\x y c -> (c == LT) == (x < y)) xs
+        , testProperty "same as <=" $ cmpProp (\x y c -> (c /= GT) == (x <= y)) xs
+        , testProperty "same as > " $ cmpProp (\x y c -> (c == GT) == (x > y)) xs
+        , testProperty "same as >=" $ cmpProp (\x y c -> (c /= LT) == (x >= y)) xs
+        , testProperty "min is lte" $ do
+              x <- xs
+              y <- xs
+              let m = min x y
+              pure $ m <= x && m <= y
+        , testProperty "max is gte" $ do
+              x <- xs
+              y <- xs
+              let m = max x y
+              pure $ m >= x && m >= y]
   where
     inv EQ = EQ
     inv LT = GT
     inv GT = LT
 
-cmpProp :: (Ord a, Show a) => (a -> a -> Ordering) -> Gen a -> Gen Property
+cmpProp :: (Ord a, Show a, Testable prop) => (a -> a -> Ordering -> prop) -> Gen a -> Gen Property
 cmpProp f xs = do
     x <- xs
     y <- xs
     let c = compare x y
-    pure $ collect c $ c === f x y
+    pure $ collect c $ f x y c
 
 monoidProps :: (Monoid a, Show a, Eq a) => Gen a -> TestTree
 monoidProps xs =
@@ -198,7 +214,7 @@ monoidProps xs =
 
 liftedOrd :: (Ord1 f, Show (f a), Ord a, Ord (f a)) => Gen (f a) -> TestTree
 liftedOrd =
-    testProperty "compare1" . cmpProp (liftCompare compare)
+    testProperty "compare1" . cmpProp (\x y c -> liftCompare compare x y === c)
 
 {-# ANN fmapLaw "HLint: ignore Functor law" #-}
 fmapLaw
@@ -322,4 +338,5 @@ main = do
                   , ordProps
                   , liftedOrd
                   , monoidProps
-                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]]
+                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
+            , testGroup "Nat" $ withGen nat [readShow, equalityProps, ordProps]]

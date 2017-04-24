@@ -26,11 +26,44 @@ import Data.Data (Data,Typeable)
 --     arbitrary = fmap (fromInteger . getNonNegative) arbitrary
 -- :}
 
--- | Peano numbers.
+-- | Peano numbers. Care is taken to make operations as lazy as
+-- possible:
+--
+-- >>> 1 > S (S undefined)
+-- False
+-- >>> Z > undefined
+-- False
+-- >>> 3 + (undefined :: Nat) >= 3
+-- True
 data Nat
     = Z
     | S Nat
-    deriving (Eq,Ord,Generic,Data,Typeable)
+    deriving (Eq,Generic,Data,Typeable)
+
+-- | As lazy as possible
+instance Ord Nat where
+    compare Z Z = EQ
+    compare (S n) (S m) = compare n m
+    compare Z (S _) = LT
+    compare (S _) Z = GT
+    min Z _ = Z
+    min (S n) (S m) = S (min n m)
+    min _ Z = Z
+    max Z m = m
+    max (S n) (S m) = S (max n m)
+    max n Z = n
+    Z <= _ = True
+    S n <= S m = n <= m
+    S _ <= Z = False
+    Z > _ = False
+    S n > S m = n > m
+    S _ > Z = True
+    _ >= Z = True
+    Z >= S _ = False
+    S n >= S m = n >= m
+    _ < Z = False
+    S n < S m = n < m
+    Z < S _ = True
 
 -- | Singleton for type-level Peano numbers.
 data instance The Nat n where
@@ -66,6 +99,8 @@ instance Num Nat where
     n - _ = n
 
 -- | The maximum bound here is infinity.
+--
+-- prop> (maxBound :: Nat) > n
 instance Bounded Nat where
     minBound = Z
     maxBound = S maxBound
@@ -169,6 +204,7 @@ instance Read Nat where
         [ (fromInteger n, xs)
         | (n,xs) <- readsPrec d r ]
 
+-- | Will obviously diverge for values like `maxBound`.
 instance NFData Nat where
     rnf Z = ()
     rnf (S n) = rnf n
