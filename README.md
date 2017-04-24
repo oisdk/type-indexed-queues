@@ -1,7 +1,9 @@
-# type-indexed-heaps
-## Heaps with verified and unverified versions.
+# type-indexed-queues
+## Queues and Heaps with verified and unverified versions.
 
-[![Build Status](https://travis-ci.com/oisdk/type-indexed-heaps.svg?token=fXdGpZwjFQ87pr9zynKX&branch=master)](https://travis-ci.com/oisdk/type-indexed-heaps)
+[![Hackage](https://img.shields.io/hackage/v/lens.svg)](https://hackage.haskell.org/package/type-indexed-queues) [![Build Status](https://travis-ci.com/oisdk/type-indexed-heaps.svg?token=fXdGpZwjFQ87pr9zynKX&branch=master)](https://travis-ci.com/oisdk/type-indexed-heaps)
+
+
 
 This library provides implementations of five different heaps
 (binomial, pairing, skew, leftist, and Braun), each in two
