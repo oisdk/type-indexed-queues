@@ -100,5 +100,5 @@ there are some (small) manual proofs.
 ## Uses of verified heaps
 The main interesting use of these sturctures is total traversable
 sorting ([sort-traversable](https://github.com/treeowl/sort-traversable)).
-An implementation of this is provided in Data.Traversable.Sort. I'm
+An implementation of this is provided in Data.Traversable.Parts. I'm
 interested in finding out other uses for these kinds of structures.
