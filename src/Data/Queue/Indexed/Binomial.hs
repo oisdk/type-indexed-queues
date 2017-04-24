@@ -17,7 +17,7 @@
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
 -- | Size-indexed binomial heaps.
-module Data.Heap.Indexed.Binomial
+module Data.Queue.Indexed.Binomial
   (Tree(..)
   ,Node(..)
   ,Binomial(..))
@@ -25,7 +25,7 @@ module Data.Heap.Indexed.Binomial
 
 import           GHC.TypeLits
 
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Indexed.Class
 
 import           Data.Typeable (Typeable)
 import           GHC.Generics (Generic, Generic1)

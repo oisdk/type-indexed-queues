@@ -7,12 +7,12 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 -- | Skew heaps.
-module Data.Heap.Skew
+module Data.Queue.Skew
   (Skew(..))
   where
 
 import           Data.BinaryTree
-import           Data.Heap.Class
+import           Data.Queue.Class
 
 import           Control.DeepSeq (NFData(rnf))
 import           Data.Data       (Data)

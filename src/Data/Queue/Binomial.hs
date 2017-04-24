@@ -12,14 +12,14 @@
 {-# LANGUAGE DeriveGeneric         #-}
 
 -- | Simple binomial heaps, with a statically-enforced shape.
-module Data.Heap.Binomial
+module Data.Queue.Binomial
   (Binomial(..)
   ,Node(..)
   ,Tree(..))
   where
 
 import           TypeLevel.Nat
-import           Data.Heap.Class
+import           Data.Queue.Class
 
 import           Data.Typeable (Typeable)
 import           GHC.Generics (Generic, Generic1)

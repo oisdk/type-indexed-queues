@@ -4,20 +4,20 @@ import           Criterion.Main
 import           System.Random
 
 import           Data.Traversable.Parts
-import           Data.Heap.Class
+import           Data.Queue.Class
 
-import qualified Data.Heap.Indexed.Binomial as Indexed
-import qualified Data.Heap.Indexed.Pairing  as Indexed
-import qualified Data.Heap.Indexed.Skew     as Indexed
-import qualified Data.Heap.Indexed.Leftist  as Indexed
-import qualified Data.Heap.Indexed.Braun    as Indexed
+import qualified Data.Queue.Indexed.Binomial as Indexed
+import qualified Data.Queue.Indexed.Pairing  as Indexed
+import qualified Data.Queue.Indexed.Skew     as Indexed
+import qualified Data.Queue.Indexed.Leftist  as Indexed
+import qualified Data.Queue.Indexed.Braun    as Indexed
 
-import           Data.Heap.Indexed.Erased
+import           Data.Queue.Indexed.Erased
 
-import           Data.Heap.Binomial
-import           Data.Heap.Pairing
-import           Data.Heap.Skew
-import           Data.Heap.Leftist
+import           Data.Queue.Binomial
+import           Data.Queue.Pairing
+import           Data.Queue.Skew
+import           Data.Queue.Leftist
 
 import           Control.Monad              (replicateM)
 

@@ -8,12 +8,12 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -- | Size-indexed pairing heaps.
-module Data.Heap.Indexed.Pairing
+module Data.Queue.Indexed.Pairing
   (Pairing(..)
   ,HVec(..))
   where
 
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Indexed.Class
 import           GHC.TypeLits
 
 import Control.DeepSeq (NFData(rnf))

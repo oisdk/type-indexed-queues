@@ -13,22 +13,22 @@ import           Test.Tasty.QuickCheck
 
 import           Data.BinaryTree
 
-import           Data.Heap.Binomial         hiding (Tree)
-import qualified Data.Heap.Binomial         as Binomial
-import           Data.Heap.Braun            (Braun (..))
-import           Data.Heap.Leftist          (Leftist,zygoLeftist)
-import           Data.Heap.Pairing          (Pairing(..))
-import           Data.Heap.Skew
+import           Data.Queue.Binomial         hiding (Tree)
+import qualified Data.Queue.Binomial         as Binomial
+import           Data.Queue.Braun            (Braun (..))
+import           Data.Queue.Leftist          (Leftist,zygoLeftist)
+import           Data.Queue.Pairing          (Pairing(..))
+import           Data.Queue.Skew
 
-import qualified Data.Heap.Indexed.Binomial as Indexed
-import qualified Data.Heap.Indexed.Braun    as Indexed
-import           Data.Heap.Indexed.Erased
-import qualified Data.Heap.Indexed.Leftist  as Indexed
-import qualified Data.Heap.Indexed.Pairing  as Indexed
-import qualified Data.Heap.Indexed.Skew     as Indexed
+import qualified Data.Queue.Indexed.Binomial as Indexed
+import qualified Data.Queue.Indexed.Braun    as Indexed
+import           Data.Queue.Indexed.Erased
+import qualified Data.Queue.Indexed.Leftist  as Indexed
+import qualified Data.Queue.Indexed.Pairing  as Indexed
+import qualified Data.Queue.Indexed.Skew     as Indexed
 
-import           Data.Heap.Class
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Class
+import           Data.Queue.Indexed.Class
 
 import           TypeLevel.Nat
 

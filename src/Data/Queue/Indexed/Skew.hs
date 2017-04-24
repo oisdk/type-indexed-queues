@@ -7,11 +7,11 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -- | Size-indexed skew heaps.
-module Data.Heap.Indexed.Skew
+module Data.Queue.Indexed.Skew
   (Skew(..))
   where
 
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Indexed.Class
 
 import           GHC.TypeLits
 

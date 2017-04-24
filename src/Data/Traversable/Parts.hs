@@ -22,7 +22,7 @@ module Data.Traversable.Parts
   ,transformTraversable)
   where
 
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Indexed.Class
 import           GHC.TypeLits
 
 -- | A queue with a certain number of elements, and a function which

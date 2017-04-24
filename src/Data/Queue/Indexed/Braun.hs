@@ -8,7 +8,7 @@
 {-# OPTIONS_GHC -fplugin=GHC.TypeLits.Normalise #-}
 
 -- | Type-indexed Braun heaps.
-module Data.Heap.Indexed.Braun
+module Data.Queue.Indexed.Braun
   (Braun(..)
   ,Offset(..))
   where
@@ -17,7 +17,7 @@ import           Data.Proxy
 import           Data.Type.Equality
 import           GHC.TypeLits
 
-import           Data.Heap.Indexed.Class hiding (MeldableIndexedQueue (..))
+import           Data.Queue.Indexed.Class hiding (MeldableIndexedQueue (..))
 
 import           Control.DeepSeq (NFData (rnf))
 

@@ -1,17 +1,17 @@
-name:                type-indexed-heaps
+name:                type-indexed-queues
 version:             0.1.0.0
-synopsis:            Heaps with verified and unverified versions.
+synopsis:            Queues with verified and unverified versions.
 description:
-  This library provides implementations of five different heaps
+  This library provides implementations of five different queues
   (binomial, pairing, skew, leftist, and Braun), each in two
   flavours: one verified, and one not.
   .
   At the moment, only structural invariants are maintained.
   .
-  = Comparisons of verified and unverified heaps
-  Both versions of each heap are provided for comparison: for
-  instance, compare the standard leftist heap (in
-  "Data.Heap.Leftist"):
+  = Comparisons of verified and unverified queues
+  Both versions of each queue are provided for comparison: for
+  instance, compare the standard leftist queue (in
+  "Data.Queue.Leftist"):
   .
   > data Leftist a
   >   = Leaf
@@ -20,7 +20,7 @@ description:
   >         (Leftist a)
   >         (Leftist a)
   .
-  To its size-indexed counterpart (in "Data.Heap.Indexed.Leftist"):
+  To its size-indexed counterpart (in "Data.Queue.Indexed.Leftist"):
   .
   > data Leftist n a where
   >         Leaf :: Leftist 0 a
@@ -31,7 +31,7 @@ description:
   >              -> !(m <= n)
   >              -> Leftist (n + m + 1) a
   .
-  The invariant here (that the size of the left heap must
+  The invariant here (that the size of the left queue must
   always be less than that of the right) is encoded in the
   proof @m '<=' n@.
   .
@@ -86,13 +86,13 @@ description:
   A typechecker plugin does most of the heavy lifting, although
   there are some (small) manual proofs.
   .
-  = Uses of verified heaps
+  = Uses of verified queues
   The main interesting use of these sturctures is total traversable
   sorting (<https://github.com/treeowl/sort-traversable sort-traversable>).
   An implementation of this is provided in "Data.Traversable.Parts". I'm
   interested in finding out other uses for these kinds of structures.
 
-homepage:            https://github.com/oisdk/type-indexed-heaps
+homepage:            https://github.com/oisdk/type-indexed-queues
 license:             MIT
 license-file:        LICENSE
 author:              Donnacha Oisín Kidney
@@ -105,28 +105,31 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Data.Heap.Binomial
-                     , Data.Heap.Pairing
-                     , Data.Heap.Skew
-                     , Data.Heap.Leftist
-                     , Data.Heap.Braun
-                     , Data.Heap.Class
-                     , Data.Heap.WithDict
-                     , Data.Heap.Indexed.Pairing
-                     , Data.Heap.Indexed.Binomial
-                     , Data.Heap.Indexed.Skew
-                     , Data.Heap.Indexed.Leftist
-                     , Data.Heap.Indexed.Braun
-                     , Data.Heap.Indexed.Class
-                     , Data.Heap.Indexed.Erased
+  exposed-modules:     Data.Queue.Binomial
+                     , Data.Queue.Pairing
+                     , Data.Queue.Skew
+                     , Data.Queue.Leftist
+                     , Data.Queue.Braun
+                     , Data.Queue.Class
+                     , Data.Queue.WithDict
+                     , Data.Queue.Indexed.Pairing
+                     , Data.Queue.Indexed.Binomial
+                     , Data.Queue.Indexed.Skew
+                     , Data.Queue.Indexed.Leftist
+                     , Data.Queue.Indexed.Braun
+                     , Data.Queue.Indexed.Class
+                     , Data.Queue.Indexed.Erased
+                     , Data.Queue.Indexed.List
                      , Data.Traversable.Parts
-                     , Data.List.Indexed
+
+                     , Data.Tree.Replicate
+
                      , TypeLevel.Nat
                      , Data.BinaryTree
-                     , Data.Tree.Replicate
                      , TypeLevel.Singletons
                      , TypeLevel.Nat.Proofs
                      , TypeLevel.Bool
+
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise >= 0.5
                      , deepseq >= 1.4
@@ -141,18 +144,18 @@ benchmark bench
   ghc-options:         -O2 -rtsopts -threaded
 
   build-depends:       base >= 4.8
-                     , type-indexed-heaps
+                     , type-indexed-queues
                      , criterion >= 0.6
                      , containers >= 0.5
                      , random >= 1.1
                      , pqueue >= 1.3
 
-test-suite type-indexed-heaps-test
+test-suite type-indexed-queues-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , type-indexed-heaps
+                     , type-indexed-queues
                      , QuickCheck >= 2.8
                      , doctest
                      , containers >= 0.5
@@ -163,4 +166,4 @@ test-suite type-indexed-heaps-test
 
 source-repository head
   type:     git
-  location: https://github.com/oisdk/type-indexed-heaps
+  location: https://github.com/oisdk/type-indexed-queues

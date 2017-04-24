@@ -6,15 +6,15 @@
 {-# LANGUAGE FlexibleInstances         #-}
 
 -- | Erase the size parameter on a size-indexed heap, using existentials.
-module Data.Heap.Indexed.Erased
+module Data.Queue.Indexed.Erased
   (ErasedSize(..))
   where
 
 import           GHC.TypeLits
 
-import           Data.Heap.Class
-import           Data.Heap.Indexed.Class (IndexedQueue, MeldableIndexedQueue)
-import qualified Data.Heap.Indexed.Class as Indexed
+import           Data.Queue.Class
+import           Data.Queue.Indexed.Class (IndexedQueue, MeldableIndexedQueue)
+import qualified Data.Queue.Indexed.Class as Indexed
 
 -- | This type contains a size-indexed heap, however the size index is
 -- hidden. This allows it to act like a standard heap, while maintaining

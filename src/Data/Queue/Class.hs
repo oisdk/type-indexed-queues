@@ -3,7 +3,7 @@
 {-# LANGUAGE ScopedTypeVariables   #-}
 
 -- | Classes for the various heaps, mainly to avoid name clashing.
-module Data.Heap.Class
+module Data.Queue.Class
   (Queue(..)
   ,MeldableQueue(..)
   ,showsPrecQueue

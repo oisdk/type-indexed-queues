@@ -7,12 +7,12 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 -- | Leftist heaps.
-module Data.Heap.Leftist
+module Data.Queue.Leftist
   (Leftist(..)
   ,zygoLeftist)
   where
 
-import           Data.Heap.Class
+import           Data.Queue.Class
 
 import           Control.DeepSeq (NFData (rnf))
 import           Data.Data       (Data)

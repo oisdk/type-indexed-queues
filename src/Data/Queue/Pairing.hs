@@ -7,11 +7,11 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 -- | Pairing heaps.
-module Data.Heap.Pairing
+module Data.Queue.Pairing
   (Pairing(..))
   where
 
-import           Data.Heap.Class
+import           Data.Queue.Class
 
 import           Control.DeepSeq (NFData(rnf))
 import           Data.Data       (Data)

@@ -10,14 +10,14 @@
 
 -- | This module exists to showcase some uses for indexed non-priority
 -- queues.
-module Data.List.Indexed
+module Data.Queue.Indexed.List
   (List(..)
   ,DiffList(..)
   ,reverseTraversable
   ,reverseTraversal)
   where
 
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Indexed.Class
 import           TypeLevel.Singletons hiding (The(..))
 import           Data.Traversable.Parts
 

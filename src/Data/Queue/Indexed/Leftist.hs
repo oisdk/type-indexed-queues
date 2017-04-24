@@ -11,11 +11,11 @@
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -- | Statically verified, type-indexed, weight-biased leftist heaps.
-module Data.Heap.Indexed.Leftist
+module Data.Queue.Indexed.Leftist
   (Leftist(..))
   where
 
-import           Data.Heap.Indexed.Class
+import           Data.Queue.Indexed.Class
 
 import           Data.Type.Equality
 import           Prelude

@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators         #-}
 
 -- | Classes for common functions between the heaps.
-module Data.Heap.Indexed.Class where
+module Data.Queue.Indexed.Class where
 
 import           GHC.TypeLits
 

@@ -7,12 +7,12 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 -- | Simple, unchecked braun heaps.
-module Data.Heap.Braun
+module Data.Queue.Braun
   (Braun(..))
   where
 
 import           Data.BinaryTree
-import           Data.Heap.Class
+import           Data.Queue.Class
 
 import           Control.DeepSeq (NFData (rnf))
 import           Data.Data       (Data)

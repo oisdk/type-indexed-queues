@@ -7,11 +7,11 @@
 {-# LANGUAGE DeriveDataTypeable    #-}
 
 -- | Provides a wrapper for queues, allowing them to conform to 'Foldable'.
-module Data.Heap.WithDict
+module Data.Queue.WithDict
   (WithDict(..))
   where
 
-import           Data.Heap.Class
+import           Data.Queue.Class
 import           Data.Proxy
 
 import           Control.DeepSeq (NFData(rnf))
