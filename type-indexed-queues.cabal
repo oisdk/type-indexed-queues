@@ -11,7 +11,8 @@ description:
   More information, and a walkthough of a couple implementations, can
   be found at this <http://doisinkidney.com/posts/2017-04-23-verifying-data-structures-in-haskell-lhs.html blog post>.
   .
-  = Comparisons of verified and unverified queues
+  /Comparisons of verified and unverified queues/
+  .
   Both versions of each queue are provided for comparison: for
   instance, compare the standard leftist queue (in
   "Data.Queue.Leftist"):
@@ -77,7 +78,8 @@ description:
   >     rl = rank r2 +. w1
   >     rr = rank l2
   .
-  = Using type families and typechecker plugins to encode the invariants
+  /Using type families and typechecker plugins to encode the invariant/
+  .
   The similarity is accomplished through overloading, and some
   handy functions. For instance, the second if-then-else works
   on boolean /singletons/, and the @<=.@ function provides a
@@ -89,7 +91,8 @@ description:
   A typechecker plugin does most of the heavy lifting, although
   there are some (small) manual proofs.
   .
-  = Uses of verified queues
+  /Uses of verified queues/
+  .
   The main interesting use of these sturctures is total traversable
   sorting (<https://github.com/treeowl/sort-traversable sort-traversable>).
   An implementation of this is provided in "Data.Traversable.Parts". I'm
