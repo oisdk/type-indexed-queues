@@ -1,6 +1,7 @@
 name:                type-indexed-queues
 version:             0.1.0.1
 synopsis:            Queues with verified and unverified versions.
+compiler:            GHC >= 8.0
 description:
   This library provides implementations of five different queues
   (binomial, pairing, skew, leftist, and Braun), each in two
