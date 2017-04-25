@@ -38,6 +38,8 @@ import           Data.Monoid
 import           Data.Proxy
 
 import           Data.Functor.Classes
+import           Data.Function (on)
+import           Control.Applicative
 
 nat :: Gen Nat
 nat = fmap (fromInteger . getNonNegative) arbitrary
@@ -89,6 +91,51 @@ indexedSort (_ :: Proxy h) =
         (\xs ->
               heapSort (Proxy :: Proxy (ErasedSize h)) (xs :: [Int]) ===
               sort xs)
+
+holdsForLength :: Foldable f => (a -> Bool) -> f a -> Int
+holdsForLength p = flip (foldr f id ) 0 where
+  f e a i | p e = a (i + 1)
+          | otherwise = i
+
+enumSyntax :: (Ord a, Show a, Enum a) => (Int -> Bool) -> Gen a -> TestTree
+enumSyntax p (xs :: Gen a) =
+    testGroup
+        "enum"
+        [ testProperty "from . to" $
+          forAll arbitrary $
+          \x ->
+               p x ==> (fromEnum . (toEnum :: Int -> a)) x === x
+        , testProperty "to . from" $
+          forAll xs $
+          \x ->
+               (toEnum . fromEnum) x === x
+        , testProperty "[n..]" $
+          forAll (liftA2 (,) xs arbitrary) $
+          \(x,Positive n) ->
+               let lhs = take n (map fromEnum [x ..])
+                   rhs = take n [fromEnum x ..]
+                   len = min (holdsForLength p lhs) (holdsForLength p rhs)
+               in ((===) `on` take len) lhs rhs
+        , testProperty "[n,m..]" $
+          forAll (liftA3 (,,) xs xs arbitrary) $
+          \(x,y,Positive n) ->
+               let lhs = take n (map fromEnum [x,y ..])
+                   rhs = take n [fromEnum x,fromEnum y ..]
+                   len = min (holdsForLength p lhs) (holdsForLength p rhs)
+               in ((===) `on` take len) lhs rhs
+        , testProperty "[n..m]" $
+          forAll (liftA2 (,) xs xs) $
+          \(x,y) ->
+               y >= x ==> map fromEnum [x .. y] === [fromEnum x .. fromEnum y]
+        , testProperty "[l,n..m]" $
+          forAll (liftA3 (,,) xs xs xs) $
+          \(x,y,z) ->
+               x > y &&
+               y >
+               z ==> map fromEnum [x,y .. z] ===
+               [fromEnum x,fromEnum y .. fromEnum z] .&&.
+               map fromEnum [z,y .. x] ===
+               [fromEnum z,fromEnum y .. fromEnum x]]
 
 leftist :: Ord a => Leftist a -> Bool
 leftist =
@@ -339,4 +386,7 @@ main = do
                   , liftedOrd
                   , monoidProps
                   , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
-            , testGroup "Nat" $ withGen nat [readShow, equalityProps, ordProps]]
+            , testGroup "Nat" $
+              withGen
+                  nat
+                  [readShow, equalityProps, ordProps, enumSyntax (0 <=)]]
