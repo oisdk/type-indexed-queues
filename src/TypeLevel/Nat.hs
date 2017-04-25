@@ -90,11 +90,7 @@ instance Num Nat where
     fromInteger = go . abs
       where
         go 0 = Z
-        go n
-          | even n = r
-          | otherwise = S r
-          where
-            r = S (S Z) * go (n `div` 2)
+        go n = S (go (n-1))
     S n - S m = n - m
     n - _ = n
 
@@ -135,11 +131,7 @@ instance Enum Nat where
     toEnum = go . abs
       where
         go 0 = Z
-        go n
-          | even n = r
-          | otherwise = S r
-          where
-            r = S (S Z) * go (n `div` 2)
+        go n = S (go (n-1))
     enumFrom = iterate S
     enumFromTo n m = unfoldr f (n, S m - n)
       where
