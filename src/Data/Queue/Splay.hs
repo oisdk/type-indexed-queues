@@ -2,14 +2,18 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE DeriveFunctor         #-}
 
-module Data.Queue.Splay where
+-- | Simple splay heaps.
+module Data.Queue.Splay
+  (Splay(..))
+  where
 
 import           Data.BinaryTree
 import           Data.Queue.Class
 
 import           Control.DeepSeq (NFData(rnf))
 
--- | A simple splay heap. Based on <https://hackage.haskell.org/package/EdisonCore-1.3.1.1/docs/src/Data-Edison-Coll-SplayHeap.html#Heap this>.
+-- | A simple splay heap. Based on
+-- <https://hackage.haskell.org/package/EdisonCore-1.3.1.1/docs/src/Data-Edison-Coll-SplayHeap.html#Heap this>.
 newtype Splay a = Splay { runSplay :: Tree a } deriving Functor
 
 instance Ord a => Queue Splay a where
