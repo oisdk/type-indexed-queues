@@ -41,8 +41,8 @@ data Leftist n a where
         Leaf :: Leftist 0 a
         Node :: !(The Nat (n + m + 1))
              -> a
-             -> Leftist n a
-             -> Leftist m a
+             -> !(Leftist n a)
+             -> !(Leftist m a)
              -> !(m <= n)
              -> Leftist (n + m + 1) a
 

@@ -195,12 +195,11 @@ replicateA n x = go n
   where
     go m
       | m <= 0 = pure Leaf
-      | otherwise =
-          case quotRem m 2 of
-              (o,1) ->
-                  let r = go o
-                  in Node <$> x <*> r <*> r
-              (e,_) -> Node <$> x <*> go e <*> go (e - 1)
+      | even m = Node <$> x <*> r <*> go (d - 1)
+      | otherwise = Node <$> x <*> r <*> r
+      where
+        d = m `div` 2
+        r = go d
 
 instance Monoid (Tree a) where
     mappend Leaf y         = y
