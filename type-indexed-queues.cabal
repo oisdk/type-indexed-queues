@@ -2,8 +2,8 @@ name:                type-indexed-queues
 version:             0.2.0.0
 synopsis:            Queues with verified and unverified versions.
 description:
-  This library provides implementations of five different queues
-  (binomial, pairing, skew, leftist, and Braun), each in two
+  This library provides implementations of six different queues
+  (binomial, pairing, skew, leftist, splay, and Braun), each in two
   flavours: one verified, and one not.
   .
   At the moment, only structural invariants are maintained.

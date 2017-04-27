@@ -3,8 +3,8 @@
 
 [![Hackage](https://img.shields.io/hackage/v/type-indexed-queues.svg)](https://hackage.haskell.org/package/type-indexed-queues) [![Build Status](https://travis-ci.org/oisdk/type-indexed-queues.svg?branch=master)](https://travis-ci.org/oisdk/type-indexed-queues)
 
-This library provides implementations of five different heaps
-(binomial, pairing, skew, leftist, and Braun), each in two
+This library provides implementations of six different heaps
+(binomial, pairing, skew, splay, leftist, and Braun), each in two
 flavours: one verified, and one not.
 
 At the moment, only structural invariants are maintained.
