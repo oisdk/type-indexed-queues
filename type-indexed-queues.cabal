@@ -114,6 +114,7 @@ library
   exposed-modules:     Data.Queue.Binomial
                      , Data.Queue.Pairing
                      , Data.Queue.Skew
+                     , Data.Queue.Splay
                      , Data.Queue.Leftist
                      , Data.Queue.Braun
                      , Data.Queue.Class
@@ -126,6 +127,7 @@ library
                      , Data.Queue.Indexed.Class
                      , Data.Queue.Indexed.Erased
                      , Data.Queue.Indexed.List
+                     , Data.Queue.Indexed.Splay
                      , Data.Traversable.Parts
 
                      , Data.Tree.Replicate

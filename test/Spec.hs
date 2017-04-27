@@ -19,6 +19,7 @@ import           Data.Queue.Braun            (Braun (..))
 import           Data.Queue.Leftist          (Leftist,zygoLeftist)
 import           Data.Queue.Pairing          (Pairing(..))
 import           Data.Queue.Skew
+import           Data.Queue.Splay
 
 import qualified Data.Queue.Indexed.Binomial as Indexed
 import qualified Data.Queue.Indexed.Braun    as Indexed
@@ -26,6 +27,7 @@ import           Data.Queue.Indexed.Erased
 import qualified Data.Queue.Indexed.Leftist  as Indexed
 import qualified Data.Queue.Indexed.Pairing  as Indexed
 import qualified Data.Queue.Indexed.Skew     as Indexed
+import qualified Data.Queue.Indexed.Splay    as Indexed
 
 import           Data.Queue.Class
 import           Data.Queue.Indexed.Class
@@ -64,6 +66,9 @@ pairing (T x xs) = all (\y -> isAbove x y && pairing y) xs
 
 skew :: Ord a => Skew a -> Bool
 skew (Skew xs) = isHeap xs
+
+splay :: Ord a => Splay a -> Bool
+splay (Splay _) = True
 
 lengthAlg :: (Int, a -> Int -> Int -> Int)
 lengthAlg = (0, const (+))
@@ -360,6 +365,16 @@ main = do
                   , ordProps
                   , monoidProps
                   , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
+            , testGroup "Splay" $
+              propHeapSort (Proxy :: Proxy Splay) :
+              withGen
+                  (fmap (fromList :: [Int] -> Splay Int) arbitrary)
+                  [ proper splay
+                  , readShow
+                  , equalityProps
+                  , ordProps
+                  , monoidProps
+                  , functorLaws (Proxy :: Proxy Int) (Proxy :: Proxy Int)]
             , testGroup
                   "Indexed Braun"
                   [indexedSort (Proxy :: Proxy Indexed.Braun)]
@@ -375,6 +390,9 @@ main = do
             , testGroup
                   "Indexed Skew"
                   [indexedSort (Proxy :: Proxy Indexed.Skew)]
+            , testGroup
+                  "Indexed Splay"
+                  [indexedSort (Proxy :: Proxy Indexed.Splay)]
             , testGroup "Binary Tree" $
               withGen
                   intTree

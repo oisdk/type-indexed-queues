@@ -92,4 +92,4 @@ instance Ord a =>
 instance NFData a =>
          NFData (Leftist n a) where
     rnf Leaf = ()
-    rnf (Node n x l r Refl) = n `seq` rnf x `seq` rnf l `seq` rnf r `seq` ()
+    rnf (Node n x l r Refl) = n `seq` rnf x `seq` rnf l `seq` rnf r

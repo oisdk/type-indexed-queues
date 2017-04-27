@@ -11,6 +11,7 @@ import qualified Data.Queue.Indexed.Pairing  as Indexed
 import qualified Data.Queue.Indexed.Skew     as Indexed
 import qualified Data.Queue.Indexed.Leftist  as Indexed
 import qualified Data.Queue.Indexed.Braun    as Indexed
+import qualified Data.Queue.Indexed.Splay    as Indexed
 
 import           Data.Queue.Indexed.Erased
 
@@ -42,7 +43,8 @@ testSize n =
           \xs ->
                bgroup
                    "seq"
-                   [ bench "trav binom"       $ nf (queueTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
+                   [ bench "trav splay"       $ nf (queueTraversable (Proxy :: Proxy Indexed.Splay)) xs
+                   , bench "trav binom"       $ nf (queueTraversable (Proxy :: Proxy (Indexed.Binomial 0))) xs
                    , bench "trav pairing"     $ nf (queueTraversable (Proxy :: Proxy Indexed.Pairing)) xs
                    , bench "trav skew"        $ nf (queueTraversable (Proxy :: Proxy Indexed.Skew)) xs
                    , bench "trav leftist"     $ nf (queueTraversable (Proxy :: Proxy Indexed.Leftist)) xs
