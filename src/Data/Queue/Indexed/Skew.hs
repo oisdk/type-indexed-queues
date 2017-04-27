@@ -40,4 +40,4 @@ instance Ord a => MeldableIndexedQueue Skew a where
 instance NFData a =>
          NFData (Skew n a) where
     rnf Empty = ()
-    rnf (Node x l r) = rnf x `seq` rnf l `seq` rnf r `seq` ()
+    rnf (Node x l r) = rnf x `seq` rnf l `seq` rnf r

@@ -51,7 +51,7 @@ instance Foldable (WithDict f) where
 -- Instances
 --------------------------------------------------------------------------------
 instance NFData (f a) => NFData (WithDict f a) where
-    rnf (WithDict x) = rnf x `seq` ()
+    rnf (WithDict x) = rnf x
 
 deriving instance
          (Data a, Data (f a), Typeable f, Queue f a) => Data

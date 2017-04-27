@@ -101,7 +101,7 @@ zygoLeftist b1 f1 b f = snd . go
 instance NFData a =>
          NFData (Leftist a) where
     rnf Leaf           = ()
-    rnf (Node i x l r) = rnf i `seq` rnf x `seq` rnf l `seq` rnf r `seq` ()
+    rnf (Node i x l r) = rnf i `seq` rnf x `seq` rnf l `seq` rnf r
 
 instance Ord a => Eq (Leftist a) where
     (==) = eqQueue

@@ -44,7 +44,7 @@ data Tree a
 instance NFData a =>
          NFData (Tree a) where
     rnf Leaf         = ()
-    rnf (Node x l r) = rnf x `seq` rnf l `seq` rnf r `seq` ()
+    rnf (Node x l r) = rnf x `seq` rnf l `seq` rnf r
 
 instance Eq1 Tree where
     liftEq _ Leaf Leaf = True

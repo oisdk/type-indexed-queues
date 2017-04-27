@@ -75,7 +75,7 @@ minViewTree (Node x l r) = Just (x, mergeTree l r)
 -- Instances
 --------------------------------------------------------------------------------
 instance NFData a => NFData (Braun a) where
-    rnf (Braun xs) = rnf xs `seq` ()
+    rnf (Braun xs) = rnf xs
 
 instance Ord a => Eq (Braun a) where
     (==) = eqQueue

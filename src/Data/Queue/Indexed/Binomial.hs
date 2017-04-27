@@ -148,8 +148,8 @@ minViewZipMay (t@(Root x ts) :- f) = Min $ case minViewZipMay f of
 
 instance NFData a => NFData (Binomial rk n a) where
     rnf Nil = ()
-    rnf (Skip xs) = rnf xs `seq` ()
-    rnf (x :- xs) = rnf x `seq` rnf xs `seq` ()
+    rnf (Skip xs) = rnf xs
+    rnf (x :- xs) = rnf x `seq` rnf xs
 
 deriving instance Foldable (Binomial rk n)
 deriving instance Functor (Binomial rk n)

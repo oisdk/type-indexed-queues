@@ -128,8 +128,8 @@ instance Ord a => MeldableQueue (Binomial 'Z) a where
 
 instance NFData a => NFData (Binomial rk a) where
     rnf Nil = ()
-    rnf (Skip xs) = rnf xs `seq` ()
-    rnf (x :- xs) = rnf x `seq` rnf xs `seq` ()
+    rnf (Skip xs) = rnf xs
+    rnf (x :- xs) = rnf x `seq` rnf xs
 
 deriving instance Foldable (Binomial rk)
 deriving instance Functor (Binomial rk)

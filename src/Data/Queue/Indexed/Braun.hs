@@ -114,4 +114,4 @@ instance NFData (Offset n m) where
 instance NFData a =>
          NFData (Braun n a) where
     rnf Leaf = ()
-    rnf (Node o x l r) = rnf o `seq` rnf x `seq` rnf l `seq` rnf r `seq` ()
+    rnf (Node o x l r) = rnf o `seq` rnf x `seq` rnf l `seq` rnf r

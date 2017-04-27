@@ -66,4 +66,4 @@ instance NFData a => NFData (Pairing n a) where
 
 instance NFData a => NFData (HVec n a) where
     rnf HNil = ()
-    rnf (HCons x xs) = rnf x `seq` rnf xs `seq` ()
+    rnf (HCons x xs) = rnf x `seq` rnf xs

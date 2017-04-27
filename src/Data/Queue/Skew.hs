@@ -50,7 +50,7 @@ instance Ord a => MeldableQueue Skew a where
 --------------------------------------------------------------------------------
 instance NFData a =>
          NFData (Skew a) where
-    rnf (Skew x) = rnf x `seq` ()
+    rnf (Skew x) = rnf x
 
 instance Ord a => Eq (Skew a) where
     (==) = eqQueue

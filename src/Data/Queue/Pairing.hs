@@ -60,7 +60,7 @@ mergePairs (h1 : h2 : hs) =
 instance NFData a =>
          NFData (Pairing a) where
     rnf E = ()
-    rnf (T x xs) = rnf x `seq` rnf xs `seq` ()
+    rnf (T x xs) = rnf x `seq` rnf xs
 
 instance Ord a => Eq (Pairing a) where
     (==) = eqQueue
