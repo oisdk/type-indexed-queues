@@ -30,6 +30,8 @@ import           Data.Bifunctor
 import           Data.Bool
 import           Data.Function
 
+import           Data.Functor.Identity
+
 -- | A simple binary tree for use in some of the heaps.
 data Tree a
     = Leaf
@@ -176,15 +178,7 @@ unfoldTree f = go where
 --
 -- prop> n >= 0 ==> length (replicateTree n x) == n
 replicateTree :: Int -> a -> Tree a
-replicateTree n x = go n
-  where
-    go m
-      | m <= 0 = Leaf
-      | even m = Node x r (go (d-1))
-      | otherwise = Node x r r
-      where
-        d = m `div` 2
-        r = go d
+replicateTree n x = runIdentity (replicateA n (Identity x))
 
 -- | @'replicateA' n a@ replicates the action @a@ @n@ times.
 replicateA :: Applicative f => Int -> f a -> f (Tree a)
@@ -192,11 +186,12 @@ replicateA n x = go n
   where
     go m
       | m <= 0 = pure Leaf
-      | otherwise = Node <$> x <*> r <*> go (d-1)
+      | even m = Node <$> x <*> r <*> go (d-1)
       | otherwise = Node <$> x <*> r <*> r
       where
         d = m `div` 2
         r = go d
+{-# SPECIALIZE replicateA :: Int -> Identity a -> Identity (Tree a) #-}
 
 instance Monoid (Tree a) where
     mappend Leaf y         = y
