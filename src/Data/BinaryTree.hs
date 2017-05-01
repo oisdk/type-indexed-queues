@@ -30,8 +30,6 @@ import           Data.Bifunctor
 import           Data.Bool
 import           Data.Function
 
-import qualified Data.Tree            as Rose
-
 -- | A simple binary tree for use in some of the heaps.
 data Tree a
     = Leaf
@@ -182,12 +180,11 @@ replicateTree n x = go n
   where
     go m
       | m <= 0 = Leaf
-      | otherwise =
-          case quotRem m 2 of
-              (o,1) ->
-                  let r = go o
-                  in Node x r r
-              (e,_) -> Node x (go e) (go (e - 1))
+      | even m = Node x r (go (d-1))
+      | otherwise = Node x r r
+      where
+        d = m `div` 2
+        r = go d
 
 -- | @'replicateA' n a@ replicates the action @a@ @n@ times.
 replicateA :: Applicative f => Int -> f a -> f (Tree a)
@@ -195,7 +192,7 @@ replicateA n x = go n
   where
     go m
       | m <= 0 = pure Leaf
-      | even m = Node <$> x <*> r <*> go (d - 1)
+      | otherwise = Node <$> x <*> r <*> go (d-1)
       | otherwise = Node <$> x <*> r <*> r
       where
         d = m `div` 2
@@ -215,6 +212,27 @@ treeFromList (x:xs) = uncurry (Node x `on` treeFromList) (pairs xs) where
   f e a b = bool first second b (e:) (a (not b))
 
 -- | Pretty-print a tree.
+--
+-- >>> putStr (drawBinaryTree (treeFromList [1..7]))
+--    1
+--  3   2
+-- 7 5 6 4
 drawBinaryTree :: Show a => Tree a -> String
-drawBinaryTree = Rose.drawForest . foldTree [] f where
-  f x l r = [Rose.Node (show x) (l ++ r)]
+drawBinaryTree = foldr (. (:) '\n') "" . snd . foldTree (0, []) f
+  where
+    f el (llen,lb) (rlen,rb) =
+        ( llen + rlen + xlen
+        , pad llen . (xshw ++) . pad rlen :
+          zipLongest (pad llen) (pad rlen) join' lb rb)
+      where
+        xshw = show el
+        xlen = length xshw
+        join' x y = x . pad xlen . y
+    pad 0 = id
+    pad n = (' ' :) . pad (n - 1)
+
+zipLongest :: a -> b -> (a -> b -> c) -> [a] -> [b] -> [c]
+zipLongest ldef rdef fn = go where
+  go (x:xs) (y:ys) = fn x y : go xs ys
+  go [] ys = map (fn ldef) ys
+  go xs [] = map (`fn` rdef) xs
